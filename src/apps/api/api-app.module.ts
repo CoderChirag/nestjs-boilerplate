@@ -1,8 +1,8 @@
 import { Module } from "@nestjs/common";
-import { APP_INTERCEPTOR } from "@nestjs/core";
+import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
 import { LoggerModule } from "nestjs-pino";
+import { HttpExceptionFilter } from "src/filters/http-exception.filter";
 import { ReqResInterceptor } from "src/interceptors/request-response.interceptor";
-import { HelloController } from "src/modules/hello/hello.controller";
 import { HelloModule } from "src/modules/hello/hello.module";
 import { loggerConfigurations } from "src/utility/logger-configuration";
 
@@ -12,6 +12,10 @@ import { loggerConfigurations } from "src/utility/logger-configuration";
 		{
 			provide: APP_INTERCEPTOR,
 			useClass: ReqResInterceptor,
+		},
+		{
+			provide: APP_FILTER,
+			useClass: HttpExceptionFilter,
 		},
 	],
 })
