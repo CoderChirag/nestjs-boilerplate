@@ -1,0 +1,60 @@
+import { Connection, Model, Schema, connections, createConnection } from "mongoose";
+
+type SchemaEntityType<S> = S extends Schema<infer T> ? T : never;
+
+type Models<S> = {
+	[K in keyof S]: Model<SchemaEntityType<S[K]>>;
+};
+
+export class MongoService<S extends Record<string, Schema<any>>> {
+	private schemas: S;
+	public models: Models<S> = {} as Models<S>;
+
+	private connectionString: string;
+	private mongoConnectionRef: Connection;
+
+	constructor(connectionString: string, schemas: S) {
+		this.connectionString = connectionString;
+		this.schemas = schemas;
+	}
+
+	async connect() {
+		this.mongoConnectionRef = await this.initiateConnection(this.connectionString);
+		this.setupModels();
+	}
+
+	private async initiateConnection(connectionString: string) {
+		try {
+			const conn = await createConnection(connectionString);
+			if (conn) {
+				console.log("Successfully connected to mongoose");
+				return conn;
+			}
+		} catch (e) {
+			console.error("Error connecting to mongoose!!");
+			throw e;
+		}
+		throw new Error("Error connecting to mongoose!!");
+	}
+
+	private setupModels() {
+		for (const [modelName, model] of Object.entries(this.schemas)) {
+			(this.models[modelName] as any) =
+				this.mongoConnectionRef.model[modelName] ?? this.mongoConnectionRef.model(modelName, model);
+			this[modelName] = this.models[modelName];
+		}
+	}
+
+	async closeConnection() {
+		return Promise.all(connections.map((conn) => conn.close()));
+	}
+
+	isConnected() {
+		return this.mongoConnectionRef.readyState === 1;
+	}
+}
+
+export const getMongoService = <S extends Record<string, Schema<any>>>(
+	connectionString: string,
+	schemas: S,
+) => new MongoService(connectionString, schemas) as MongoService<S> & Models<S>;

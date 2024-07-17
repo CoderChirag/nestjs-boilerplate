@@ -1,11 +1,8 @@
-import { HydratedDocument, Schema, model } from "mongoose";
+import { HydratedDocument, Mongoose, Schema, model } from "mongoose";
 import { TodoEntity } from "src/utility/entities/todos/todo.entity";
 import { TodoStatus } from "src/utility/types/todos/todo.enum";
 
 export const TodoSchema = new Schema<TodoEntity>({
-	_id: {
-		type: Number,
-	},
 	title: {
 		type: String,
 		required: true,
