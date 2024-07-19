@@ -1,14 +1,9 @@
 import { Connection, Model, Schema, connections, createConnection } from "mongoose";
-
-type SchemaEntityType<S> = S extends Schema<infer T> ? T : never;
-
-type Models<S> = {
-	[K in keyof S]: Model<SchemaEntityType<S[K]>>;
-};
+import type { MongoModels, MongoSchemasType } from "../types";
 
 export class MongoService<S extends Record<string, Schema<any>>> {
 	private schemas: S;
-	public models: Models<S> = {} as Models<S>;
+	public models: MongoModels<S> = {} as MongoModels<S>;
 
 	private connectionString: string;
 	private mongoConnectionRef: Connection;
@@ -27,7 +22,7 @@ export class MongoService<S extends Record<string, Schema<any>>> {
 		try {
 			const conn = await createConnection(connectionString);
 			if (conn) {
-				console.log("Successfully connected to mongoose");
+				console.log("Successfully connected to mongoose!!");
 				return conn;
 			}
 		} catch (e) {
@@ -49,12 +44,10 @@ export class MongoService<S extends Record<string, Schema<any>>> {
 		return Promise.all(connections.map((conn) => conn.close()));
 	}
 
-	isConnected() {
+	async isConnected() {
 		return this.mongoConnectionRef.readyState === 1;
 	}
 }
 
-export const getMongoService = <S extends Record<string, Schema<any>>>(
-	connectionString: string,
-	schemas: S,
-) => new MongoService(connectionString, schemas) as MongoService<S> & Models<S>;
+export const getMongoService = <S extends MongoSchemasType>(connectionString: string, schemas: S) =>
+	new MongoService(connectionString, schemas) as MongoService<S> & MongoModels<S>;
