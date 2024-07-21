@@ -6,7 +6,7 @@ import { HttpExceptionFilter } from "src/filters/http-exception.filter";
 import { ReqResInterceptor } from "src/interceptors/request-response.interceptor";
 import { HelloModule } from "src/modules/hello/hello.module";
 import { DBServicesModule } from "src/services/db-module/db.module";
-import { DB_TYPES, SUPPORTED_DBS } from "src/utility/db-utility/constants";
+import { SUPPORTED_DBS } from "src/utility/db-utility/constants";
 import { loggerConfigurations } from "src/utility/logger-configuration";
 import { SCHEMAS } from "src/utility/models/mongo";
 import { MODELS } from "src/utility/models/sql";
@@ -35,7 +35,7 @@ const configs = {
 @Module({
 	imports: [
 		LoggerModule.forRoot(loggerConfigurations),
-		DBServicesModule.forRootAsync(configs),
+		DBServicesModule.forRoot(configs),
 		HelloModule,
 	],
 	providers: [

@@ -1,35 +1,20 @@
-import { DynamicModule, Global, Module, NestModule, Provider } from "@nestjs/common";
-import { DB_TYPES } from "src/utility/db-utility/constants";
-import { DBService } from "src/utility/db-utility/db.service";
-import { IDBConfigOptions, MongoSchemasType, SqlModelsType } from "src/utility/db-utility/types";
+import { DynamicModule, Module } from "@nestjs/common";
+import { DB_TYPES, IConfigModelsOrSchemas, IDBConfigOptions } from "src/utility/db-utility/types";
+import { DbServicesProvider } from "./db.service";
 
-export type ConfigOptions<
-	T extends DB_TYPES,
-	S extends MongoSchemasType | SqlModelsType,
-> = IDBConfigOptions<T, S> & { providerName: string };
-
-const provider = <T extends DB_TYPES, S extends MongoSchemasType | SqlModelsType>(
-	config: ConfigOptions<T, S>,
-): Provider => {
-	return {
-		provide: config.providerName,
-		useFactory: async () => {
-			const dbService = new DBService<T, S>(config).getDbInstance();
-			await dbService.connect();
-			return dbService;
-		},
-	};
-};
+export type ConfigOptions<T extends DB_TYPES, S extends IConfigModelsOrSchemas> = IDBConfigOptions<
+	T,
+	S
+> & { providerName: string };
 
 @Module({})
 export class DBServicesModule {
-	static forRootAsync<
-		T extends Record<string, ConfigOptions<DB_TYPES, MongoSchemasType | SqlModelsType>>,
-	>(dbConfigs: T): DynamicModule {
-		const providers = Object.values(dbConfigs).map((config) => provider(config));
+	static forRoot<T extends Record<string, ConfigOptions<DB_TYPES, IConfigModelsOrSchemas>>>(
+		dbConfigs: T,
+	): DynamicModule {
 		return {
 			module: DBServicesModule,
-			providers,
+			providers: Object.values(dbConfigs).map((config) => DbServicesProvider(config)),
 			exports: Object.values(dbConfigs).map((config) => config.providerName),
 			global: true,
 		};

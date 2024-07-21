@@ -1,6 +1,6 @@
 import apm from "elastic-apm-node";
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from "@nestjs/common";
-import { Request, Response } from "express";
+import { ArgumentsHost, Catch, ExceptionFilter } from "@nestjs/common";
+import { Response } from "express";
 import { ErrorResponseDto } from "src/exceptions/response.dto";
 
 @Catch()
@@ -9,7 +9,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
 		apm.captureError(exception);
 		const ctx = host.switchToHttp();
 		const response = ctx.getResponse<Response>();
-		const request = ctx.getRequest<Request>();
 		const status = exception?.status ?? 500;
 
 		const error = errorCodeRespConstructor(exception);

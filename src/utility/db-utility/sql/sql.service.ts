@@ -15,16 +15,16 @@ export class SqlService<T extends SqlModelsType> {
 		this.modelsRef = models;
 	}
 
+	get sequelize() {
+		return this.dbConnectionRef;
+	}
+
 	async connect() {
 		this.dbConnectionRef = await this.initiateConnection(
 			this.connectionString,
 			this.dialectOptions,
 		);
 		this.setupModels();
-	}
-
-	get sequelize() {
-		return this.dbConnectionRef;
 	}
 
 	private async initiateConnection(connectionString: string, dialectOptions: Options) {
@@ -61,6 +61,29 @@ export class SqlService<T extends SqlModelsType> {
 
 	async closeConnection() {
 		return await this.dbConnectionRef.close();
+	}
+
+	async syncDb() {
+		return await this.dbConnectionRef.sync();
+	}
+
+	fn() {
+		return this.sequelize.fn;
+	}
+
+	async createStoredProcedure(name: string, params: string[], query: string) {
+		const dropQuery = `DROP FUNCTION IF EXISTS ${name}(${params})`;
+
+		const createQuery = `
+			CREATE OR REPLACE FUNCTION ${name}(${params}) RETURNS void AS $$
+			BEGIN
+				${query};
+			END;
+			$$ LANGUAGE plpgsql;
+		`;
+
+		await this.dbConnectionRef.query(dropQuery);
+		await this.dbConnectionRef.query(createQuery);
 	}
 }
 

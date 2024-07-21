@@ -1,5 +1,5 @@
 import apm from "elastic-apm-node";
-import { INestApplication, Module, ValidationPipe } from "@nestjs/common";
+import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { constants } from "./constants/constants";
 import { NestFactory } from "@nestjs/core";
 import { ApiAppModule } from "./apps/api/api-app.module";

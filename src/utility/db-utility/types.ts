@@ -1,7 +1,7 @@
 import { Options as SequelizeOptions, Sequelize } from "sequelize";
-import { DB_TYPES, SUPPORTED_DBS } from "./constants";
-import { MongoService, getMongoService } from "./mongo/mongo.service";
-import { SqlService, getSqlService } from "./sql/sql.service";
+import { SUPPORTED_DBS } from "./constants";
+import { MongoService } from "./mongo/mongo.service";
+import { SqlService } from "./sql/sql.service";
 import { Model as MongooseModel, Schema as MongooseSchema } from "mongoose";
 
 export type MongoSchemasType = Record<string, MongooseSchema<any>>;
@@ -55,3 +55,6 @@ export type IDBConfigOptions<
 			? ISqlConfigOptions<S>
 			: never
 		: never;
+
+export type DB_TYPES = (typeof SUPPORTED_DBS)[keyof typeof SUPPORTED_DBS];
+export type IConfigModelsOrSchemas = MongoSchemasType | SqlModelsType;

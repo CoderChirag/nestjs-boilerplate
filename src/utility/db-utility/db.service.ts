@@ -1,9 +1,16 @@
-import { DB_TYPES, SUPPORTED_DBS } from "./constants";
+import { SUPPORTED_DBS } from "./constants";
 import { getMongoService } from "./mongo/mongo.service";
 import { getSqlService } from "./sql/sql.service";
-import type { IDBConfigOptions, IDbInstance, MongoSchemasType, SqlModelsType } from "./types";
+import type {
+	DB_TYPES,
+	IConfigModelsOrSchemas,
+	IDBConfigOptions,
+	IDbInstance,
+	MongoSchemasType,
+	SqlModelsType,
+} from "./types";
 
-export class DBService<T extends DB_TYPES, S extends MongoSchemasType | SqlModelsType> {
+export class DBService<T extends DB_TYPES, S extends IConfigModelsOrSchemas> {
 	private _db: IDbInstance<T, S>;
 
 	constructor(config: IDBConfigOptions<T, S>) {

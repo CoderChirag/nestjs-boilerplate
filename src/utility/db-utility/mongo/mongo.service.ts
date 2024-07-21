@@ -1,4 +1,4 @@
-import { Connection, Model, Schema, connections, createConnection } from "mongoose";
+import { Connection, Schema, connections, createConnection } from "mongoose";
 import type { IMongoModels, IMongoService, MongoSchemasType } from "../types";
 
 export class MongoService<S extends Record<string, Schema<any>>> {
