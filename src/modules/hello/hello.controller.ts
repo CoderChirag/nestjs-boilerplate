@@ -7,10 +7,10 @@ export class HelloController {
 
 	@Get()
 	async getHello() {
-		return await this.helloService.getHello22();
+		return await this.helloService.getTodosFromMongo();
 	}
 	@Get("sql")
 	async getH() {
-		return await this.helloService.getHello44();
+		return await this.helloService.getTodosFromSql();
 	}
 }

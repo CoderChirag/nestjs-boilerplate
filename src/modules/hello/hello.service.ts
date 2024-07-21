@@ -1,37 +1,19 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { IMongoService, ISqlService } from "src/utility/db-utility/types";
-import { SCHEMAS } from "src/utility/models/mongo";
-import { MODELS } from "src/utility/models/sql";
-import { constants, TodoStatus } from "src/constants";
+import { Injectable } from "@nestjs/common";
+import { TodosMongoService } from "src/services/db-services/todos/todos-mongo.service";
+import { TodosSqlService } from "src/services/db-services/todos/todos-sql.service";
 
 @Injectable()
 export class HelloService {
 	constructor(
-		@Inject(constants.DB_SERVICES.TODOS_MONGO_DB_SERVICE)
-		private readonly todosMongoService: IMongoService<typeof SCHEMAS.todos>,
-		@Inject(constants.DB_SERVICES.TODOS_SQL_DB_SERVICE)
-		private readonly todosSqlService: ISqlService<typeof MODELS.todos>,
+		private readonly todosMongoService: TodosMongoService,
+		private readonly todosSqlService: TodosSqlService,
 	) {}
 
-	async getHello22() {
-		await this.todosMongoService.todo.create({
-			description: "Do something serious",
-			priority: "1",
-			status: TodoStatus.DOING,
-			title: "sd",
-		});
-		const a = await this.todosMongoService.todo.findById("6697e3a1f5b9a1ea2793c5f6");
-		return a;
+	async getTodosFromMongo() {
+		return await this.todosMongoService.findAllTodos();
 	}
 
-	async getHello44() {
-		await this.todosSqlService.todo.create({
-			description: "Do something serious",
-			priority: 1,
-			status: TodoStatus.DOING,
-			title: "sd",
-		});
-		const a = await this.todosSqlService.todo.findByPk(3);
-		console.log(await this.todosSqlService.isConnected());
+	async getTodosFromSql() {
+		return await this.todosSqlService.findAllTodos();
 	}
 }

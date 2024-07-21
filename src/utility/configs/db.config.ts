@@ -7,13 +7,13 @@ import { MODELS } from "../models/sql";
 
 export const dbConfigs: Record<string, DbConfigOptions<DB_TYPES, IConfigModelsOrSchemas>> = {
 	mongo: {
-		providerName: constants.DB_SERVICES.TODOS_MONGO_DB_SERVICE,
+		providerName: constants.DB_SERVICES.MONGO_DB_SERVICE,
 		type: SUPPORTED_DBS.MONGO_DB,
 		connectionString: process.env.MONGO_CONNECTION_STRING!,
 		schemas: SCHEMAS.todos,
 	},
 	sql: {
-		providerName: constants.DB_SERVICES.TODOS_SQL_DB_SERVICE,
+		providerName: constants.DB_SERVICES.SQL_DB_SERVICE,
 		type: SUPPORTED_DBS.SQL,
 		connectionString: process.env.SQL_CONNECTION_STRING!,
 		models: MODELS.todos,

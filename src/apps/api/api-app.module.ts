@@ -5,7 +5,7 @@ import { LoggerModule } from "nestjs-pino";
 import { HttpExceptionFilter } from "src/filters/http-exception.filter";
 import { ReqResInterceptor } from "src/interceptors/request-response.interceptor";
 import { HelloModule } from "src/modules/hello/hello.module";
-import { DBServicesModule } from "src/services/db-module/db.module";
+import { DBModule } from "src/services/db-module/db.module";
 import { dbConfigs } from "src/utility/configs/db.config";
 import { loggerConfigurations } from "src/utility/logger-configuration";
 
@@ -16,7 +16,7 @@ import { loggerConfigurations } from "src/utility/logger-configuration";
 			ignoreEnvFile: true,
 			isGlobal: true,
 		}),
-		DBServicesModule.forRoot(dbConfigs),
+		DBModule.forRoot(dbConfigs),
 		HelloModule,
 	],
 	providers: [
