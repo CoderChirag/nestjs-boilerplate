@@ -1,9 +1,9 @@
 import { Model, Options, Sequelize } from "sequelize";
-import { SqlModels, SqlModelsType } from "../types";
+import { ISqlModels, ISqlService, SqlModelsType } from "../types";
 
 export class SqlService<T extends SqlModelsType> {
 	private modelsRef: T;
-	public models: SqlModels<T> = {} as SqlModels<T>;
+	public models: ISqlModels<T> = {} as ISqlModels<T>;
 
 	private connectionString: string;
 	private dialectOptions: Options;
@@ -23,14 +23,14 @@ export class SqlService<T extends SqlModelsType> {
 		this.setupModels();
 	}
 
-	getSequelizeInstance() {
+	get sequelize() {
 		return this.dbConnectionRef;
 	}
 
 	private async initiateConnection(connectionString: string, dialectOptions: Options) {
 		try {
 			const conn = new Sequelize(connectionString, dialectOptions);
-			console.log("Successfully Connected to Sequelize");
+			console.log("Successfully Connected to Sequelize!!");
 			return conn;
 			// }
 		} catch (e) {
@@ -68,4 +68,4 @@ export const getSqlService = <T extends Record<string, (db: Sequelize) => Model<
 	connectionString: string,
 	models: T,
 	dialectOptions?: Options,
-) => new SqlService(connectionString, models, dialectOptions) as SqlService<T> & SqlModels<T>;
+) => new SqlService(connectionString, models, dialectOptions) as ISqlService<T>;

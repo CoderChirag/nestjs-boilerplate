@@ -6,7 +6,7 @@ import { HttpExceptionFilter } from "src/filters/http-exception.filter";
 import { ReqResInterceptor } from "src/interceptors/request-response.interceptor";
 import { HelloModule } from "src/modules/hello/hello.module";
 import { DBServicesModule } from "src/services/db-module/db.module";
-import { DB_TYPES } from "src/utility/db-utility/constants";
+import { DB_TYPES, SUPPORTED_DBS } from "src/utility/db-utility/constants";
 import { loggerConfigurations } from "src/utility/logger-configuration";
 import { SCHEMAS } from "src/utility/models/mongo";
 import { MODELS } from "src/utility/models/sql";
@@ -14,13 +14,13 @@ import { MODELS } from "src/utility/models/sql";
 const configs = {
 	mongo: {
 		providerName: constants.DB_SERVICES.TODOS_MONGO_DB_SERVICE,
-		type: DB_TYPES.MONGO_DB,
+		type: SUPPORTED_DBS.MONGO_DB,
 		connectionString: "mongodb://localhost:27017/test",
 		schemas: SCHEMAS.todos,
 	},
 	sql: {
 		providerName: constants.DB_SERVICES.TODOS_SQL_DB_SERVICE,
-		type: DB_TYPES.SQL as DB_TYPES.SQL,
+		type: SUPPORTED_DBS.SQL,
 		connectionString: "mysql://127.0.0.1:3306",
 		models: MODELS.todos,
 		dialectOptions: {

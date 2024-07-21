@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { constants } from "src/constants/constants";
-import { MongoDbService, SqlDbService } from "src/utility/db-utility/types";
+import { IMongoService, ISqlService } from "src/utility/db-utility/types";
 import { SCHEMAS } from "src/utility/models/mongo";
 import { MODELS } from "src/utility/models/sql";
 import { TodoStatus } from "src/utility/types/todos/todo.enum";
@@ -9,9 +9,9 @@ import { TodoStatus } from "src/utility/types/todos/todo.enum";
 export class HelloService {
 	constructor(
 		@Inject(constants.DB_SERVICES.TODOS_MONGO_DB_SERVICE)
-		private readonly todosMongoService: MongoDbService<typeof SCHEMAS.todos>,
+		private readonly todosMongoService: IMongoService<typeof SCHEMAS.todos>,
 		@Inject(constants.DB_SERVICES.TODOS_SQL_DB_SERVICE)
-		private readonly todosSqlService: SqlDbService<typeof MODELS.todos>,
+		private readonly todosSqlService: ISqlService<typeof MODELS.todos>,
 	) {}
 
 	async getHello22() {

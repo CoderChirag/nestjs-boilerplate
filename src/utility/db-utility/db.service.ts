@@ -1,25 +1,40 @@
-import { DB_TYPES } from "./constants";
+import { DB_TYPES, SUPPORTED_DBS } from "./constants";
 import { getMongoService } from "./mongo/mongo.service";
 import { getSqlService } from "./sql/sql.service";
-import type { DBConfigOptions, DbInstanceType, MongoSchemasType, SqlModelsType } from "./types";
+import type { IDBConfigOptions, IDbInstance, MongoSchemasType, SqlModelsType } from "./types";
 
-export class DBService<T extends DB_TYPES, S extends MongoSchemasType, K extends SqlModelsType> {
-	private _db: DbInstanceType<T, S, K>;
+export class DBService<T extends DB_TYPES, S extends MongoSchemasType | SqlModelsType> {
+	private _db: IDbInstance<T, S>;
 
-	constructor(config: DBConfigOptions<T, S, K>) {
-		const { type, connectionString, schemas, models, dialectOptions } = config;
+	constructor(config: IDBConfigOptions<T, S>) {
+		const { type, connectionString } = config;
 		switch (type) {
-			case DB_TYPES.MONGO_DB:
+			case SUPPORTED_DBS.MONGO_DB:
+				const { schemas } = config as IDBConfigOptions<
+					typeof SUPPORTED_DBS.MONGO_DB,
+					MongoSchemasType
+				>;
 				if (!schemas) {
 					throw new Error("Schemas are required for MongoDB connection");
 				}
-				(this._db as any) = getMongoService(connectionString, schemas as S);
+				(this._db as any) = getMongoService(
+					connectionString,
+					schemas as S extends MongoSchemasType ? S : never,
+				);
 				break;
-			case DB_TYPES.SQL:
+			case SUPPORTED_DBS.SQL:
+				const { models, dialectOptions } = config as IDBConfigOptions<
+					typeof SUPPORTED_DBS.SQL,
+					SqlModelsType
+				>;
 				if (!models) {
 					throw new Error("Models are required for SQL connection");
 				}
-				(this._db as any) = getSqlService(connectionString, models as K, dialectOptions);
+				(this._db as any) = getSqlService(
+					connectionString,
+					models as S extends SqlModelsType ? S : never,
+					dialectOptions,
+				);
 				break;
 		}
 	}

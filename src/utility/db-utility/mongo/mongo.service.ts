@@ -1,9 +1,9 @@
 import { Connection, Model, Schema, connections, createConnection } from "mongoose";
-import type { MongoModels, MongoSchemasType } from "../types";
+import type { IMongoModels, IMongoService, MongoSchemasType } from "../types";
 
 export class MongoService<S extends Record<string, Schema<any>>> {
 	private schemas: S;
-	public models: MongoModels<S> = {} as MongoModels<S>;
+	public models: IMongoModels<S> = {} as IMongoModels<S>;
 
 	private connectionString: string;
 	private mongoConnectionRef: Connection;
@@ -50,4 +50,4 @@ export class MongoService<S extends Record<string, Schema<any>>> {
 }
 
 export const getMongoService = <S extends MongoSchemasType>(connectionString: string, schemas: S) =>
-	new MongoService(connectionString, schemas) as MongoService<S> & MongoModels<S>;
+	new MongoService(connectionString, schemas) as IMongoService<S>;
