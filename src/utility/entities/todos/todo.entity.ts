@@ -1,4 +1,4 @@
-import { TodoStatus } from "src/utility/types/todos/todo.enum";
+import { TodoStatus } from "src/constants";
 
 export class TodoEntity {
 	_id: number;

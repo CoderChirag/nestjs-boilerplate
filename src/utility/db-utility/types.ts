@@ -6,6 +6,7 @@ import { Model as MongooseModel, Schema as MongooseSchema } from "mongoose";
 
 export type MongoSchemasType = Record<string, MongooseSchema<any>>;
 export type SqlModelsType = Record<string, (db: Sequelize) => any>;
+export type IConfigModelsOrSchemas = MongoSchemasType | SqlModelsType;
 
 export type MongoSchemaEntityType<S> = S extends MongooseSchema<infer T> ? T : never;
 export type IMongoModels<S> = {
@@ -32,7 +33,7 @@ export type ISqlService<T extends SqlModelsType> = SqlService<T> & ISqlModels<T>
 
 export type IDbInstance<
 	T extends DB_TYPES,
-	S extends MongoSchemasType | SqlModelsType,
+	S extends IConfigModelsOrSchemas,
 > = T extends typeof SUPPORTED_DBS.MONGO_DB
 	? S extends MongoSchemasType
 		? IMongoService<S>
@@ -45,7 +46,7 @@ export type IDbInstance<
 
 export type IDBConfigOptions<
 	T extends DB_TYPES,
-	S extends MongoSchemasType | SqlModelsType,
+	S extends IConfigModelsOrSchemas,
 > = T extends typeof SUPPORTED_DBS.MONGO_DB
 	? S extends MongoSchemasType
 		? IMongoConfigOptions<S>
@@ -57,4 +58,3 @@ export type IDBConfigOptions<
 		: never;
 
 export type DB_TYPES = (typeof SUPPORTED_DBS)[keyof typeof SUPPORTED_DBS];
-export type IConfigModelsOrSchemas = MongoSchemasType | SqlModelsType;

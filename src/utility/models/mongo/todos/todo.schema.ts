@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 import { TodoEntity } from "src/utility/entities/todos/todo.entity";
-import { TodoStatus } from "src/utility/types/todos/todo.enum";
+import { TodoStatus } from "src/constants";
 
 export const TodoSchema = new Schema<TodoEntity>({
 	title: {

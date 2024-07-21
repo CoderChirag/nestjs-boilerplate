@@ -1,9 +1,8 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { constants } from "src/constants/constants";
 import { IMongoService, ISqlService } from "src/utility/db-utility/types";
 import { SCHEMAS } from "src/utility/models/mongo";
 import { MODELS } from "src/utility/models/sql";
-import { TodoStatus } from "src/utility/types/todos/todo.enum";
+import { constants, TodoStatus } from "src/constants";
 
 @Injectable()
 export class HelloService {

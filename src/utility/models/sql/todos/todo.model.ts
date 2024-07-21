@@ -6,7 +6,7 @@ import {
 	Model,
 	Sequelize,
 } from "sequelize";
-import { TodoStatus } from "src/utility/types/todos/todo.enum";
+import { TodoStatus } from "src/constants";
 
 export class Todo extends Model<InferAttributes<Todo>, InferCreationAttributes<Todo>> {
 	declare _id: CreationOptional<number>;
