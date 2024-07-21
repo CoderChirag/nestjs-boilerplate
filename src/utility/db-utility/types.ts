@@ -1,4 +1,4 @@
-import { Options, Sequelize } from "sequelize";
+import { Options as SequelizeOptions, Sequelize } from "sequelize";
 import { DB_TYPES } from "./constants";
 import { getMongoService } from "./mongo/mongo.service";
 import { getSqlService } from "./sql/sql.service";
@@ -26,8 +26,21 @@ export interface DBConfigOptions<
 	type: T;
 	connectionString: string;
 	schemas?: S;
-	dialectOptions?: T extends DB_TYPES.SQL ? Options : never;
+	dialectOptions?: T extends DB_TYPES.SQL ? SequelizeOptions : never;
 	models?: K;
+}
+
+export interface MongoConfigOptions<S extends MongoSchemasType> {
+	type: DB_TYPES.MONGO_DB;
+	connectionString: string;
+	schemas: S;
+}
+
+export interface SqlConfigOptions<M extends SqlModelsType> {
+	type: DB_TYPES.SQL;
+	connectionString: string;
+	models: M;
+	dialectOptions?: SequelizeOptions;
 }
 
 export type MongoSchemaEntityType<S> = S extends Schema<infer T> ? T : never;
@@ -39,3 +52,6 @@ export type MongoModels<S> = {
 export type SqlModels<T extends SqlModelsType> = {
 	[K in keyof T]: ReturnType<T[K]>;
 };
+
+export type MongoDbService<S extends MongoSchemasType> = ReturnType<typeof getMongoService<S>>;
+export type SqlDbService<T extends SqlModelsType> = ReturnType<typeof getSqlService<T>>;

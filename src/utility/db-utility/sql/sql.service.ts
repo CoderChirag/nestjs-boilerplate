@@ -23,9 +23,14 @@ export class SqlService<T extends SqlModelsType> {
 		this.setupModels();
 	}
 
+	getSequelizeInstance() {
+		return this.dbConnectionRef;
+	}
+
 	private async initiateConnection(connectionString: string, dialectOptions: Options) {
 		try {
 			const conn = new Sequelize(connectionString, dialectOptions);
+			console.log("Successfully Connected to Sequelize");
 			return conn;
 			// }
 		} catch (e) {
@@ -38,6 +43,10 @@ export class SqlService<T extends SqlModelsType> {
 		for (const [modelName, model] of Object.entries(this.modelsRef)) {
 			(this.models[modelName] as any) = model(this.dbConnectionRef);
 			this[modelName] = this.models[modelName];
+
+			if (this[modelName].associate) {
+				this[modelName].associate(this.models);
+			}
 		}
 	}
 
