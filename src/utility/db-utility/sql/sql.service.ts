@@ -70,21 +70,6 @@ export class SqlService<T extends SqlModelsType> {
 	fn() {
 		return this.sequelize.fn;
 	}
-
-	async createStoredProcedure(name: string, params: string[], query: string) {
-		const dropQuery = `DROP FUNCTION IF EXISTS ${name}(${params})`;
-
-		const createQuery = `
-			CREATE OR REPLACE FUNCTION ${name}(${params}) RETURNS void AS $$
-			BEGIN
-				${query};
-			END;
-			$$ LANGUAGE plpgsql;
-		`;
-
-		await this.dbConnectionRef.query(dropQuery);
-		await this.dbConnectionRef.query(createQuery);
-	}
 }
 
 export const getSqlService = <T extends Record<string, (db: Sequelize) => Model<any, any>>>(

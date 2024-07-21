@@ -34,6 +34,5 @@ export class HelloService {
 		});
 		const a = await this.todosSqlService.todo.findByPk(3);
 		console.log(await this.todosSqlService.isConnected());
-		return a;
 	}
 }
