@@ -5,10 +5,11 @@ export const constants = {
 		},
 	},
 	SWAGGER: {
-		TITLE: "API",
-		DESCRIPTION: "API",
+		TITLE: "Nestjs Boilerplate",
+		DESCRIPTION: "A boilerplate for creating a nestjs project",
 		VERSION: "1.0",
 		DOCUMENTATION_PATH: "/api/docs",
+		JSON_DOCUMENTATION_PATH: "/api/docs-json",
 	},
 	DB_SERVICES: {
 		MONGO_DB_SERVICE: "MONGO_DB_SERVICE",

@@ -1,7 +1,7 @@
 import apm from "elastic-apm-node";
 import { ArgumentsHost, Catch, ExceptionFilter } from "@nestjs/common";
 import { Response } from "express";
-import { ErrorResponseDto } from "src/exceptions/response.dto";
+import { BaseErrorResponseDto } from "src/dtos/error-response.dto";
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -17,7 +17,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 }
 
 function errorCodeRespConstructor(error: any) {
-	const response = new ErrorResponseDto();
+	const response = new BaseErrorResponseDto();
 	response.success = false;
 	response.error = {
 		message: error?.message ?? "Something went wrong",

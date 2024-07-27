@@ -29,7 +29,9 @@ export class AppModule {
 
 				const document = SwaggerModule.createDocument(app, config);
 
-				SwaggerModule.setup(constants.SWAGGER.DOCUMENTATION_PATH, app, document);
+				SwaggerModule.setup(constants.SWAGGER.DOCUMENTATION_PATH, app, document, {
+					jsonDocumentUrl: constants.SWAGGER.JSON_DOCUMENTATION_PATH,
+				});
 				break;
 			default:
 				break;
