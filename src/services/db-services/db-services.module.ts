@@ -1,9 +1,10 @@
 import { Module } from "@nestjs/common";
-import { TodosMongoService } from "./todos/todos-mongo.service";
-import { TodosSqlService } from "./todos/todos-sql.service";
+import { TodoMongoService } from "./todo/todos-mongo.service";
+import { TodoSqlService } from "./todo/todos-sql.service";
+import { TodoRepository } from "./todo/todos.repository";
 
 @Module({
-	providers: [TodosMongoService, TodosSqlService],
-	exports: [TodosMongoService, TodosSqlService],
+	providers: [TodoMongoService, TodoSqlService, TodoRepository],
+	exports: [TodoRepository],
 })
 export class DBServicesModule {}
