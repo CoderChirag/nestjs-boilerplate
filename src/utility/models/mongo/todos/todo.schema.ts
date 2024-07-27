@@ -1,24 +1,19 @@
-import { Schema } from "mongoose";
-import { TodoEntity } from "src/utility/entities/todos/todo.entity";
 import { TodoStatus } from "src/constants";
+import { Schema as NestSchema, Prop, SchemaFactory } from "@nestjs/mongoose";
+import { Schema } from "mongoose";
 
-export const TodoSchema = new Schema<TodoEntity>({
-	title: {
-		type: String,
-		required: true,
-	},
-	description: {
-		type: String,
-	},
-	priority: {
-		type: Number,
-		required: true,
-		default: 0,
-	},
-	status: {
-		type: String,
-		required: true,
-		enum: TodoStatus,
-		default: TodoStatus.TO_DO,
-	},
-});
+@NestSchema()
+export class Todo {
+	@Prop({ required: true, type: Schema.Types.ObjectId })
+	_id: string;
+	@Prop({ required: true })
+	title: string;
+	@Prop({ required: true })
+	description: string;
+	@Prop({ required: true, default: 0 })
+	priority: number;
+	@Prop({ required: true, default: TodoStatus.DOING, enum: TodoStatus })
+	status: string;
+}
+
+export const TodoSchema = SchemaFactory.createForClass(Todo);

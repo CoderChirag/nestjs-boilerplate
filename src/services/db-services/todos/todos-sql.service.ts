@@ -1,9 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { constants } from "src/constants";
 import { ISqlService } from "src/utility/db-utility/types";
-import { TodoEntity } from "src/utility/entities/todos/todo.entity";
 import { MODELS } from "src/utility/models/sql";
 import { ITodosService } from "../interfaces/todos.interface";
+import { Todo } from "src/utility/models/sql/todos/todo.model";
 
 @Injectable()
 export class TodosSqlService implements ITodosService {
@@ -12,7 +12,7 @@ export class TodosSqlService implements ITodosService {
 		private readonly sqlService: ISqlService<typeof MODELS.todos>,
 	) {}
 
-	async findAllTodos(): Promise<TodoEntity[]> {
+	async findAllTodos(): Promise<Todo[]> {
 		return await this.sqlService.todo.findAll();
 	}
 }

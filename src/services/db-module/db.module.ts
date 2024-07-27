@@ -1,6 +1,6 @@
 import { DynamicModule, Module } from "@nestjs/common";
 import { DB_TYPES, IConfigModelsOrSchemas, IDBConfigOptions } from "src/utility/db-utility/types";
-import { DBProvider } from "./db.service";
+import { DBProvider } from "./db.provider";
 
 export type ConfigOptions<T extends DB_TYPES, S extends IConfigModelsOrSchemas> = IDBConfigOptions<
 	T,

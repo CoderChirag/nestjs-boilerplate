@@ -1,5 +1,5 @@
-import { TodoEntity } from "src/utility/entities/todos/todo.entity";
+import { Todo } from "src/utility/models/mongo/todos/todo.schema";
 
 export interface ITodosService {
-	findAllTodos(): Promise<TodoEntity[]>;
+	findAllTodos(): Promise<any>;
 }

@@ -17,7 +17,7 @@ export class DBService<T extends DB_TYPES, S extends IConfigModelsOrSchemas> {
 		const { type, connectionString } = config;
 		switch (type) {
 			case SUPPORTED_DBS.MONGO_DB:
-				const { schemas } = config as IDBConfigOptions<
+				const { schemas, configOptions, hooks } = config as IDBConfigOptions<
 					typeof SUPPORTED_DBS.MONGO_DB,
 					MongoSchemasType
 				>;
@@ -27,6 +27,8 @@ export class DBService<T extends DB_TYPES, S extends IConfigModelsOrSchemas> {
 				(this._db as any) = getMongoService(
 					connectionString,
 					schemas as S extends MongoSchemasType ? S : never,
+					configOptions,
+					hooks,
 				);
 				break;
 			case SUPPORTED_DBS.SQL:

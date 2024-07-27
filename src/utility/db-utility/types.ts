@@ -2,9 +2,13 @@ import { Options as SequelizeOptions, Sequelize } from "sequelize";
 import { SUPPORTED_DBS } from "./constants";
 import { MongoService } from "./mongo/mongo.service";
 import { SqlService } from "./sql/sql.service";
-import { Model as MongooseModel, Schema as MongooseSchema } from "mongoose";
+import {
+	Model as MongooseModel,
+	Schema as MongooseSchema,
+	ConnectOptions as MongoConnectOptions,
+} from "mongoose";
 
-export type MongoSchemasType = Record<string, MongooseSchema<any>>;
+export type MongoSchemasType = Record<string, MongooseSchema>;
 export type SqlModelsType = Record<string, (db: Sequelize) => any>;
 export type IConfigModelsOrSchemas = MongoSchemasType | SqlModelsType;
 
@@ -20,6 +24,8 @@ export interface IMongoConfigOptions<S extends MongoSchemasType> {
 	type: typeof SUPPORTED_DBS.MONGO_DB;
 	connectionString: string;
 	schemas: S;
+	configOptions?: MongoConnectOptions;
+	hooks?: (schemas: S) => void | Promise<void>;
 }
 export interface ISqlConfigOptions<M extends SqlModelsType> {
 	type: typeof SUPPORTED_DBS.SQL;

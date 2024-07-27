@@ -1,10 +1,9 @@
 import { Controller, Get } from "@nestjs/common";
 import { HelloService } from "./hello.service";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { TodoEntity } from "src/utility/entities/todos/todo.entity";
 import { BaseErrorResponseDto } from "src/dtos/error-response.dto";
-import { HttpResponseDto } from "src/dtos/http-response.dto";
 import { GetTodosFromMongoDto, GetTodosFromSqlDto } from "./hello.dto";
+import { Todo } from "src/utility/models/mongo/todos/todo.schema";
 
 @ApiTags("Hello")
 @ApiResponse({
@@ -22,7 +21,7 @@ export class HelloController {
 		description: "Data from MongoDb",
 		type: GetTodosFromMongoDto,
 	})
-	async getHello(): Promise<TodoEntity[]> {
+	async getHello(): Promise<Todo[]> {
 		return await this.helloService.getTodosFromMongo();
 	}
 	@Get("sql")
