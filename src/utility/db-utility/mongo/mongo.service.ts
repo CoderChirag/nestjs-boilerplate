@@ -2,6 +2,8 @@ import { ConnectOptions, Connection, Schema, connections, createConnection } fro
 import type { IMongoModels, IMongoService, MongoSchemasType } from "../types";
 
 export class MongoService<S extends Record<string, Schema<any>>> {
+	private logger: any;
+
 	public schemas: S;
 	public models: IMongoModels<S> = {} as IMongoModels<S>;
 
@@ -15,11 +17,13 @@ export class MongoService<S extends Record<string, Schema<any>>> {
 		schemas: S,
 		configOptions?: ConnectOptions,
 		hooks?: (schemas: S) => void | Promise<void>,
+		logger?: any,
 	) {
 		this.connectionString = connectionString;
 		this.schemas = schemas;
 		this.configOptions = configOptions ?? {};
 		this.hooks = hooks ?? (() => {});
+		this.logger = logger ?? console;
 	}
 
 	async connect() {
@@ -34,11 +38,11 @@ export class MongoService<S extends Record<string, Schema<any>>> {
 		try {
 			const conn = await createConnection(connectionString, configOptions);
 			if (conn) {
-				console.log("Successfully connected to mongoose!!");
+				this.logger.log("Successfully connected to mongoose!!");
 				return conn;
 			}
 		} catch (e) {
-			console.error("Error connecting to mongoose!!");
+			this.logger.error("Error connecting to mongoose!!");
 			throw e;
 		}
 		throw new Error("Error connecting to mongoose!!");
@@ -54,7 +58,8 @@ export class MongoService<S extends Record<string, Schema<any>>> {
 	}
 
 	async closeConnection() {
-		return Promise.all(connections.map((conn) => conn.close()));
+		await Promise.all(connections.map((conn) => conn.close()));
+		this.logger.log("Mongoose connection closed!!");
 	}
 
 	async isConnected() {
@@ -67,4 +72,5 @@ export const getMongoService = <S extends MongoSchemasType>(
 	schemas: S,
 	configOptions?: ConnectOptions,
 	hooks?: (schemas: S) => void | Promise<void>,
-) => new MongoService(connectionString, schemas, configOptions, hooks) as IMongoService<S>;
+	logger?: any,
+) => new MongoService(connectionString, schemas, configOptions, hooks, logger) as IMongoService<S>;

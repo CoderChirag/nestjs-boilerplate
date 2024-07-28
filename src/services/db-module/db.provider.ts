@@ -1,6 +1,6 @@
 import { DB_TYPES, IConfigModelsOrSchemas } from "src/utility/db-utility/types";
 import { ConfigOptions } from "./db.module";
-import { Provider } from "@nestjs/common";
+import { Logger, Provider } from "@nestjs/common";
 import { DBService } from "src/utility/db-utility/db.service";
 
 export const DBProvider = <T extends DB_TYPES, S extends IConfigModelsOrSchemas>(
@@ -11,6 +11,9 @@ export const DBProvider = <T extends DB_TYPES, S extends IConfigModelsOrSchemas>
 		useFactory: async () => {
 			const dbService = new DBService<T, S>(config).getDbInstance();
 			await dbService.connect();
+			dbService.onApplicationShutdown = async () => {
+				await dbService.closeConnection();
+			};
 			return dbService;
 		},
 	};

@@ -14,7 +14,7 @@ export class DBService<T extends DB_TYPES, S extends IConfigModelsOrSchemas> {
 	private _db: IDbInstance<T, S>;
 
 	constructor(config: IDBConfigOptions<T, S>) {
-		const { type, connectionString } = config;
+		const { type, connectionString, logger } = config;
 		switch (type) {
 			case SUPPORTED_DBS.MONGO_DB:
 				const { schemas, configOptions, hooks } = config as IDBConfigOptions<
@@ -29,6 +29,7 @@ export class DBService<T extends DB_TYPES, S extends IConfigModelsOrSchemas> {
 					schemas as S extends MongoSchemasType ? S : never,
 					configOptions,
 					hooks,
+					logger,
 				);
 				break;
 			case SUPPORTED_DBS.SQL:
@@ -43,6 +44,7 @@ export class DBService<T extends DB_TYPES, S extends IConfigModelsOrSchemas> {
 					connectionString,
 					models as S extends SqlModelsType ? S : never,
 					dialectOptions,
+					logger,
 				);
 				break;
 		}

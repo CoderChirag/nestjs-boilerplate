@@ -26,12 +26,14 @@ export interface IMongoConfigOptions<S extends MongoSchemasType> {
 	schemas: S;
 	configOptions?: MongoConnectOptions;
 	hooks?: (schemas: S) => void | Promise<void>;
+	logger?: any;
 }
 export interface ISqlConfigOptions<M extends SqlModelsType> {
 	type: typeof SUPPORTED_DBS.SQL;
 	connectionString: string;
 	models: M;
 	dialectOptions?: SequelizeOptions;
+	logger?: any;
 }
 
 export type IMongoService<S extends MongoSchemasType> = MongoService<S> & IMongoModels<S>;

@@ -3,6 +3,7 @@ export const constants = {
 		APP_NAMES: {
 			API_APP: "api-app",
 		},
+		SHUTDOWN_EVENT: "SHUTDOWN_EVENT",
 	},
 	SWAGGER: {
 		TITLE: "Nestjs Boilerplate",

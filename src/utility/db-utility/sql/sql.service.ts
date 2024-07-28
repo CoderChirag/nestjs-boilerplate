@@ -2,6 +2,7 @@ import { Model, Options, Sequelize } from "sequelize";
 import { ISqlModels, ISqlService, SqlModelsType } from "../types";
 
 export class SqlService<T extends SqlModelsType> {
+	private logger: any;
 	private modelsRef: T;
 	public models: ISqlModels<T> = {} as ISqlModels<T>;
 
@@ -9,10 +10,11 @@ export class SqlService<T extends SqlModelsType> {
 	private dialectOptions: Options;
 	private dbConnectionRef: Sequelize;
 
-	constructor(connectionString: string, models: T, dialectOptions?: Options) {
+	constructor(connectionString: string, models: T, dialectOptions?: Options, logger?: any) {
 		this.connectionString = connectionString;
 		this.dialectOptions = dialectOptions ?? {};
 		this.modelsRef = models;
+		this.logger = logger ?? console;
 	}
 
 	get sequelize() {
@@ -30,11 +32,11 @@ export class SqlService<T extends SqlModelsType> {
 	private async initiateConnection(connectionString: string, dialectOptions: Options) {
 		try {
 			const conn = new Sequelize(connectionString, dialectOptions);
-			console.log("Successfully Connected to Sequelize!!");
+			this.logger.log("Successfully Connected to Sequelize!!");
 			return conn;
 			// }
 		} catch (e) {
-			console.error("Error connecting to sequelize!!");
+			this.logger.error("Error connecting to sequelize!!");
 			throw e;
 		}
 	}
@@ -60,7 +62,8 @@ export class SqlService<T extends SqlModelsType> {
 	}
 
 	async closeConnection() {
-		return await this.dbConnectionRef.close();
+		await this.dbConnectionRef.close();
+		this.logger.log("Sequelize connection closed!!");
 	}
 
 	async syncDb() {
@@ -76,4 +79,5 @@ export const getSqlService = <T extends Record<string, (db: Sequelize) => Model<
 	connectionString: string,
 	models: T,
 	dialectOptions?: Options,
-) => new SqlService(connectionString, models, dialectOptions) as ISqlService<T>;
+	logger?: any,
+) => new SqlService(connectionString, models, dialectOptions, logger) as ISqlService<T>;

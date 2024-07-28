@@ -14,6 +14,7 @@ export class AppModule {
 			case INFRA.APP_NAMES.API_APP:
 				app = await NestFactory.create(ApiAppModule, { bufferLogs: true });
 				app.enableCors();
+				app.enableShutdownHooks();
 				app.setGlobalPrefix("/api");
 				app.useGlobalPipes(
 					new ValidationPipe({
