@@ -13,7 +13,9 @@ export class TodoMongoService implements ITodoService {
 	) {}
 
 	async findAll() {
-		const todos = (await this.mongoService.todo.find()) as TodoEntity[];
-		return todos;
+		const todos = await this.mongoService.todo.find();
+		return todos.map((todo) => {
+			return { ...todo.toJSON(), _id: todo._id.toString() } as TodoEntity;
+		});
 	}
 }

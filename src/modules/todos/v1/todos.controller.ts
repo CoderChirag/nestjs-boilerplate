@@ -1,9 +1,12 @@
-import { Controller, Get } from "@nestjs/common";
+import { ClassSerializerInterceptor, Controller, Get, UseInterceptors } from "@nestjs/common";
+import { CLASS_SERIALIZER_OPTIONS } from "@nestjs/common/serializer/class-serializer.constants";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { BaseErrorResponseDto } from "src/dtos/error-response.dto";
 import { TodosService } from "./todos.service";
 import { GetAllTodosResDto } from "./todos.dto";
+import { TodoEntity } from "src/utility/entities/todos/todo.entity";
 
+@Reflect.metadata(CLASS_SERIALIZER_OPTIONS, { excludeExtraneousValues: true })
 @ApiTags("Todos")
 @Controller("v1/todos")
 @ApiResponse({
@@ -13,6 +16,7 @@ import { GetAllTodosResDto } from "./todos.dto";
 export class TodosController {
 	constructor(private readonly todosService: TodosService) {}
 
+	@UseInterceptors(ClassSerializerInterceptor)
 	@Get()
 	@ApiOperation({ summary: "Get all todos" })
 	@ApiResponse({
@@ -20,7 +24,8 @@ export class TodosController {
 		description: "Get all todos",
 		type: GetAllTodosResDto,
 	})
-	async getAll() {
-		return await this.todosService.getAll();
+	async getAll(): Promise<TodoEntity[]> {
+		const todos = await this.todosService.getAll();
+		return todos.map((todo) => new TodoEntity(todo));
 	}
 }

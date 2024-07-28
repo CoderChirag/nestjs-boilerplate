@@ -12,6 +12,6 @@ export class TodoSqlService implements ITodoService {
 	) {}
 
 	async findAll() {
-		return await this.sqlService.todo.findAll();
+		return (await this.sqlService.todo.findAll()).map((todo) => todo.toJSON());
 	}
 }
