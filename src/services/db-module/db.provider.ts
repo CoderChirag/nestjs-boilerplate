@@ -1,7 +1,6 @@
-import { DB_TYPES, IConfigModelsOrSchemas } from "src/utility/db-utility/types";
 import { ConfigOptions } from "./db.module";
-import { Logger, Provider } from "@nestjs/common";
-import { DBService } from "src/utility/db-utility/db.service";
+import { Provider } from "@nestjs/common";
+import { DB_TYPES, IConfigModelsOrSchemas, DBService } from "src/utility/db-utility";
 
 export const DBProvider = <T extends DB_TYPES, S extends IConfigModelsOrSchemas>(
 	config: ConfigOptions<T, S>,

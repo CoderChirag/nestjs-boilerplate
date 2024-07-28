@@ -1,7 +1,7 @@
 import { Options as SequelizeOptions, Sequelize } from "sequelize";
 import { SUPPORTED_DBS } from "./constants";
-import { MongoService } from "./mongo/mongo.service";
-import { SqlService } from "./sql/sql.service";
+import { MongoService } from "./mongo/mongo-service";
+import { SqlService } from "./sql/sql-service";
 import {
 	Model as MongooseModel,
 	Schema as MongooseSchema,

@@ -1,6 +1,6 @@
 import { SUPPORTED_DBS } from "./constants";
-import { getMongoService } from "./mongo/mongo.service";
-import { getSqlService } from "./sql/sql.service";
+import { getMongoService } from "./mongo/mongo-service";
+import { getSqlService } from "./sql/sql-service";
 import type {
 	DB_TYPES,
 	IConfigModelsOrSchemas,

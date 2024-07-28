@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { constants } from "src/constants";
-import { ISqlService } from "src/utility/db-utility/types";
+import { ISqlService } from "src/utility/db-utility";
 import { MODELS } from "src/utility/models/sql";
 import { ITodoService } from "./todo.interface";
 
