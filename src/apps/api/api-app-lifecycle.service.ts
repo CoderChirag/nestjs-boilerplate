@@ -2,6 +2,7 @@ import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } fro
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { constants } from "src/constants";
 import { sigUsrAndSigtermTimeDiffLog } from "src/utility/common.util";
+import { setTimeout } from "timers/promises";
 
 @Injectable()
 export class ApiAppLifecycleService implements OnApplicationBootstrap, OnApplicationShutdown {
@@ -18,7 +19,7 @@ export class ApiAppLifecycleService implements OnApplicationBootstrap, OnApplica
 		});
 	}
 
-	onApplicationShutdown(signal?: string) {
+	async onApplicationShutdown(signal?: string) {
 		this.logger.log("App Shutdown Signal Received: " + signal);
 		sigUsrAndSigtermTimeDiffLog(this.usrSigTime, signal, this.logger);
 	}

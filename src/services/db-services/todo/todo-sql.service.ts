@@ -11,6 +11,10 @@ export class TodoSqlService implements ITodoService {
 		private readonly sqlService: ISqlService<typeof MODELS.todos>,
 	) {}
 
+	async getConnectionStatus() {
+		return await this.sqlService.isConnected();
+	}
+
 	async findAll() {
 		return (await this.sqlService.todo.findAll()).map((todo) => todo.toJSON());
 	}

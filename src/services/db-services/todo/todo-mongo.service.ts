@@ -12,6 +12,10 @@ export class TodoMongoService implements ITodoService {
 		private readonly mongoService: IMongoService<typeof SCHEMAS.todos>,
 	) {}
 
+	async getConnectionStatus() {
+		return await this.mongoService.isConnected();
+	}
+
 	async findAll() {
 		const todos = await this.mongoService.todo.find();
 		return todos.map((todo) => {

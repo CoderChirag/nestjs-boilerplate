@@ -3,6 +3,10 @@ export const constants = {
 		APP_NAMES: {
 			API_APP: "api-app",
 		},
+		HEALTH_CHECKS: {
+			SHUTDOWN_CHECK: "shutDownCheck",
+			DB_SERVICES_STATUS_CHECK: "dbServicesStatusCheck",
+		},
 		SHUTDOWN_EVENT: "SHUTDOWN_EVENT",
 	},
 	SWAGGER: {

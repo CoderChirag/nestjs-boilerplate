@@ -71,7 +71,7 @@ export const loggerConfigurations: PinoParams = {
 		autoLogging: {
 			ignore: (req) =>
 				(req as unknown as IncomingMessage & { originalUrl: string }).originalUrl.startsWith(
-					"/probes",
+					"/api/health",
 				),
 		},
 		customLogLevel: (_req, res, error) => {

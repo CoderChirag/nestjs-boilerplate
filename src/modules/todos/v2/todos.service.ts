@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ITodoService } from "src/services/db-services/todo/todo.interface";
-import { TodoRepository } from "src/services/db-services/todo/todos.repository";
+import { TodoRepository } from "src/services/db-services/todo/todo.repository";
 
 @Injectable()
 export class TodosServiceV2 {

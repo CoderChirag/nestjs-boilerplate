@@ -10,6 +10,7 @@ import { DBModule } from "src/services/db-module/db.module";
 import { dbConfigs } from "src/utility/configs/db.config";
 import { loggerConfigurations } from "src/utility/configs/logger-configuration";
 import { ApiAppLifecycleService } from "./api-app-lifecycle.service";
+import { CheckApiAppHealthModule } from "src/services/health-check-service/check-api-app-health.module";
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { ApiAppLifecycleService } from "./api-app-lifecycle.service";
 		}),
 		DBModule.forRoot(dbConfigs),
 		EventEmitterModule.forRoot(),
+		CheckApiAppHealthModule,
 		TodosModule,
 	],
 	providers: [

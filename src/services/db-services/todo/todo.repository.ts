@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { TodoMongoService } from "./todos-mongo.service";
-import { TodoSqlService } from "./todos-sql.service";
+import { TodoMongoService } from "./todo-mongo.service";
+import { TodoSqlService } from "./todo-sql.service";
 
 @Injectable()
 export class TodoRepository {
@@ -15,5 +15,13 @@ export class TodoRepository {
 
 	getSqlService() {
 		return this.sqlService;
+	}
+
+	async getConnectionStatus() {
+		const results = await Promise.all([
+			this.mongoService.getConnectionStatus(),
+			this.sqlService.getConnectionStatus(),
+		]);
+		return !results.includes(false);
 	}
 }
