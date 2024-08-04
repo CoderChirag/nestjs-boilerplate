@@ -36,6 +36,7 @@
 		"lodash": "^4.17.21",
 		"mongoose": "^8.5.1",
 		"mysql2": "^3.10.3",
+		"nestjs-db-service": "*",
 		"nestjs-pino": "^4.1.0",
 		"pino": "^9.2.0",
 		"pino-http": "^10.2.0",
