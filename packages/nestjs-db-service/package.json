@@ -18,13 +18,9 @@
 		"lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
 	},
 	"dependencies": {
-		"mongoose": "^8.5.1",
-		"mysql2": "^3.10.3",
-		"sequelize": "^6.37.3"
+		"db-service": "*"
 	},
 	"devDependencies": {
-		"@app/eslint-config": "*",
-		"@app/tsconfig": "*",
 		"@types/node": "^20.3.1",
 		"@typescript-eslint/eslint-plugin": "^6.0.0",
 		"@typescript-eslint/parser": "^6.0.0",

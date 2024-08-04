@@ -6,20 +6,16 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
-    "start:dev": "env-cmd -f .env.local nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "build": "lerna run build --stream",
+    "graph": "nx graph",
+    "dev": "lerna run start:dev --scope app --stream",
+    "packages:dev": "lerna watch -- lerna run build --ignore app --stream",
+    "start:dev": "concurrently \"yarn packages:dev\" \"yarn dev\""
   },
   "devDependencies": {
+    "concurrently": "^8.2.2",
+    "lerna": "^8.1.7",
+    "nx": "^19.5.6",
     "prettier": "^3.0.0",
     "typescript": "^5.1.3"
   },
