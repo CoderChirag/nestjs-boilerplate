@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { constants } from "src/constants";
-import { IMongoService } from "src/utility/db-utility";
+import { IMongoService } from "db-service";
 import { SCHEMAS } from "src/utility/models/mongo";
 import { ITodoService } from "./todo.interface";
 import { TodoEntity } from "src/utility/entities/todos/todo.entity";

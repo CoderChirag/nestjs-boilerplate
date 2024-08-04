@@ -1,6 +1,6 @@
 import { ConfigOptions as DbConfigOptions } from "src/services/db-module";
 import { constants } from "src/constants";
-import { SUPPORTED_DBS, DB_TYPES, IConfigModelsOrSchemas } from "../db-utility";
+import { SUPPORTED_DBS, DB_TYPES, IConfigModelsOrSchemas } from "db-service";
 import { SCHEMAS } from "../models/mongo";
 import { MODELS } from "../models/sql";
 import { Logger } from "@nestjs/common";
