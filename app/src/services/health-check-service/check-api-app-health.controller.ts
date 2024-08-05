@@ -28,7 +28,6 @@ export class CheckApiAppHealthController {
 	checkLiveness() {
 		this.logger.log("Checking Liveness");
 		return this.health.check([
-			() => this.customCheck.isShutdownModeActivated(constants.INFRA.HEALTH_CHECKS.SHUTDOWN_CHECK),
 			() =>
 				this.customCheck.dbServicesReady(constants.INFRA.HEALTH_CHECKS.DB_SERVICES_STATUS_CHECK),
 		]);

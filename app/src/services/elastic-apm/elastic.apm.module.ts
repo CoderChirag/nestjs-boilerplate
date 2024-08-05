@@ -11,6 +11,7 @@ export class ElasticApmModule {
 			captureHeaders: true,
 			captureErrorLogStackTraces: "always",
 			errorOnAbortedRequests: true,
+			captureExceptions: true,
 		});
 	}
 }
