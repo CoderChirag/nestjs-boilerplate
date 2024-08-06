@@ -1,7 +1,8 @@
 import { ConnectOptions, Connection, Schema, connections, createConnection } from "mongoose";
 import type { IMongoModels, IMongoService, MongoSchemasType } from "../types";
+import { IDBService } from "../interfaces";
 
-export class MongoService<S extends Record<string, Schema<any>>> {
+export class MongoService<S extends Record<string, Schema<any>>> implements IDBService {
 	private logger: any;
 
 	public schemas: S;

@@ -1,7 +1,8 @@
 import { Model, Options, Sequelize } from "sequelize";
 import { ISqlModels, ISqlService, SqlModelsType } from "../types";
+import { IDBService } from "../interfaces";
 
-export class SqlService<T extends SqlModelsType> {
+export class SqlService<T extends SqlModelsType> implements IDBService {
 	private logger: any;
 	private modelsRef: T;
 	public models: ISqlModels<T> = {} as ISqlModels<T>;
