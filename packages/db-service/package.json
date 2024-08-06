@@ -18,6 +18,7 @@
 		"lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
 	},
 	"dependencies": {
+		"elastic-apm-node": "^4.7.2",
 		"mongoose": "^8.5.1",
 		"mysql2": "^3.10.3",
 		"sequelize": "^6.37.3"

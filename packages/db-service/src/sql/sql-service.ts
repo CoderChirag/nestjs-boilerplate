@@ -1,9 +1,12 @@
 import { Model, Options, Sequelize } from "sequelize";
 import { ISqlModels, ISqlService, SqlModelsType } from "../types";
 import { IDBService } from "../interfaces";
+import { Agent } from "elastic-apm-node";
+import { SqlServiceError } from "../exceptions/error";
 
 export class SqlService<T extends SqlModelsType> implements IDBService {
 	private logger: any;
+	private apm?: Agent;
 	private modelsRef: T;
 	public models: ISqlModels<T> = {} as ISqlModels<T>;
 
@@ -11,11 +14,18 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 	private dialectOptions: Options;
 	private dbConnectionRef: Sequelize;
 
-	constructor(connectionString: string, models: T, dialectOptions?: Options, logger?: any) {
+	constructor(
+		connectionString: string,
+		models: T,
+		dialectOptions?: Options,
+		logger?: any,
+		apm?: Agent,
+	) {
 		this.connectionString = connectionString;
 		this.dialectOptions = dialectOptions ?? {};
 		this.modelsRef = models;
 		this.logger = logger ?? console;
+		this.apm = apm;
 	}
 
 	get sequelize() {
@@ -35,10 +45,11 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 			const conn = new Sequelize(connectionString, dialectOptions);
 			this.logger.log("Successfully Connected to Sequelize!!");
 			return conn;
-			// }
 		} catch (e) {
+			const err = new SqlServiceError("Error connecting to sequelize!!", e);
 			this.logger.error("Error connecting to sequelize!!");
-			throw e;
+			this.apm?.captureError(err);
+			throw err;
 		}
 	}
 
@@ -58,17 +69,34 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 			await this.dbConnectionRef.authenticate();
 			return true;
 		} catch (e) {
+			const err = new SqlServiceError("Error authenticating to sequelize!!", e);
+			this.logger.error("Error authenticating to sequelize!!");
+			this.apm?.captureError(err);
 			return false;
 		}
 	}
 
 	async closeConnection() {
-		await this.dbConnectionRef.close();
-		this.logger.log("Sequelize connection closed!!");
+		try {
+			await this.dbConnectionRef.close();
+			this.logger.log("Sequelize connection closed!!");
+		} catch (e) {
+			const err = new SqlServiceError("Error closing sequelize connection!!", e);
+			this.logger.error("Error closing sequelize connection!!");
+			this.apm?.captureError(err);
+			throw err;
+		}
 	}
 
 	async syncDb() {
-		return await this.dbConnectionRef.sync();
+		try {
+			return await this.dbConnectionRef.sync();
+		} catch (e) {
+			const err = new SqlServiceError("Error syncing sequelize connection!!", e);
+			this.logger.error("Error syncing sequelize connection!!");
+			this.apm?.captureError(err);
+			throw err;
+		}
 	}
 
 	fn() {
@@ -81,4 +109,5 @@ export const getSqlService = <T extends Record<string, (db: Sequelize) => Model<
 	models: T,
 	dialectOptions?: Options,
 	logger?: any,
-) => new SqlService(connectionString, models, dialectOptions, logger) as ISqlService<T>;
+	apm?: Agent,
+) => new SqlService(connectionString, models, dialectOptions, logger, apm) as ISqlService<T>;

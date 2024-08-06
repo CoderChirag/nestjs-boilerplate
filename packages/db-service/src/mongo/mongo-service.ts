@@ -1,9 +1,12 @@
 import { ConnectOptions, Connection, Schema, connections, createConnection } from "mongoose";
 import type { IMongoModels, IMongoService, MongoSchemasType } from "../types";
 import { IDBService } from "../interfaces";
+import { Agent } from "elastic-apm-node";
+import { MongoServiceError } from "../exceptions/error";
 
 export class MongoService<S extends Record<string, Schema<any>>> implements IDBService {
 	private logger: any;
+	private apm?: Agent;
 
 	public schemas: S;
 	public models: IMongoModels<S> = {} as IMongoModels<S>;
@@ -19,12 +22,14 @@ export class MongoService<S extends Record<string, Schema<any>>> implements IDBS
 		configOptions?: ConnectOptions,
 		hooks?: (schemas: S) => void | Promise<void>,
 		logger?: any,
+		apm?: Agent,
 	) {
 		this.connectionString = connectionString;
 		this.schemas = schemas;
 		this.configOptions = configOptions ?? {};
 		this.hooks = hooks ?? (() => {});
 		this.logger = logger ?? console;
+		this.apm = apm;
 	}
 
 	async connect() {
@@ -32,7 +37,7 @@ export class MongoService<S extends Record<string, Schema<any>>> implements IDBS
 			this.connectionString,
 			this.configOptions,
 		);
-		this.setupModels();
+		await this.setupModels();
 	}
 
 	private async initiateConnection(connectionString: string, configOptions: ConnectOptions) {
@@ -43,24 +48,41 @@ export class MongoService<S extends Record<string, Schema<any>>> implements IDBS
 				return conn;
 			}
 		} catch (e) {
+			const err = new MongoServiceError("Error connecting to mongoose!!", e);
 			this.logger.error("Error connecting to mongoose!!");
-			throw e;
+			this.apm?.captureError(err);
+			throw err;
 		}
-		throw new Error("Error connecting to mongoose!!");
+		throw new MongoServiceError("Error connecting to mongoose!!");
 	}
 
 	private async setupModels() {
-		await this.hooks(this.schemas);
-		for (const [modelName, model] of Object.entries(this.schemas)) {
-			(this.models[modelName] as any) =
-				this.mongoConnectionRef.model[modelName] ?? this.mongoConnectionRef.model(modelName, model);
-			this[modelName] = this.models[modelName];
+		try {
+			await this.hooks(this.schemas);
+			for (const [modelName, model] of Object.entries(this.schemas)) {
+				(this.models[modelName] as any) =
+					this.mongoConnectionRef.model[modelName] ??
+					this.mongoConnectionRef.model(modelName, model);
+				this[modelName] = this.models[modelName];
+			}
+		} catch (e) {
+			const err = new MongoServiceError("Error setting up models!!", e);
+			this.logger.error("Error setting up models!!");
+			this.apm?.captureError(err);
+			throw err;
 		}
 	}
 
 	async closeConnection() {
-		await Promise.all(connections.map((conn) => conn.close()));
-		this.logger.log("Mongoose connection closed!!");
+		try {
+			await Promise.all(connections.map((conn) => conn.close()));
+			this.logger.log("Mongoose connection closed!!");
+		} catch (e) {
+			const err = new MongoServiceError("Error closing mongoose connection!!", e);
+			this.logger.error("Error closing mongoose connection!!");
+			this.apm?.captureError(err);
+			throw err;
+		}
 	}
 
 	async isConnected() {
@@ -74,4 +96,13 @@ export const getMongoService = <S extends MongoSchemasType>(
 	configOptions?: ConnectOptions,
 	hooks?: (schemas: S) => void | Promise<void>,
 	logger?: any,
-) => new MongoService(connectionString, schemas, configOptions, hooks, logger) as IMongoService<S>;
+	apm?: Agent,
+) =>
+	new MongoService(
+		connectionString,
+		schemas,
+		configOptions,
+		hooks,
+		logger,
+		apm,
+	) as IMongoService<S>;

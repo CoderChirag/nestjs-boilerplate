@@ -1,3 +1,4 @@
+import { DBServiceError } from ".";
 import { SUPPORTED_DBS } from "./constants";
 import { getMongoService } from "./mongo/mongo-service";
 import { getSqlService } from "./sql/sql-service";
@@ -14,7 +15,7 @@ export class DBService<T extends DB_TYPES, S extends IConfigModelsOrSchemas> {
 	private _db: IDbInstance<T, S>;
 
 	constructor(config: IDBConfigOptions<T, S>) {
-		const { type, connectionString, logger } = config;
+		const { type, connectionString, logger, apm } = config;
 		switch (type) {
 			case SUPPORTED_DBS.MONGO_DB:
 				const { schemas, configOptions, hooks } = config as IDBConfigOptions<
@@ -22,7 +23,9 @@ export class DBService<T extends DB_TYPES, S extends IConfigModelsOrSchemas> {
 					MongoSchemasType
 				>;
 				if (!schemas) {
-					throw new Error("Schemas are required for MongoDB connection");
+					const err = new DBServiceError("Schemas are required for MongoDB connection");
+					apm?.captureError(err);
+					throw err;
 				}
 				(this._db as any) = getMongoService(
 					connectionString,
@@ -30,6 +33,7 @@ export class DBService<T extends DB_TYPES, S extends IConfigModelsOrSchemas> {
 					configOptions,
 					hooks,
 					logger,
+					apm,
 				);
 				break;
 			case SUPPORTED_DBS.SQL:
@@ -38,13 +42,16 @@ export class DBService<T extends DB_TYPES, S extends IConfigModelsOrSchemas> {
 					SqlModelsType
 				>;
 				if (!models) {
-					throw new Error("Models are required for SQL connection");
+					const err = new DBServiceError("Models are required for SQL connection");
+					apm?.captureError(err);
+					throw err;
 				}
 				(this._db as any) = getSqlService(
 					connectionString,
 					models as S extends SqlModelsType ? S : never,
 					dialectOptions,
 					logger,
+					apm,
 				);
 				break;
 		}

@@ -7,6 +7,7 @@ import {
 	Schema as MongooseSchema,
 	ConnectOptions as MongoConnectOptions,
 } from "mongoose";
+import { Agent } from "elastic-apm-node";
 
 export type MongoSchemasType = Record<string, MongooseSchema>;
 export type SqlModelsType = Record<string, (db: Sequelize) => any>;
@@ -27,6 +28,7 @@ export interface IMongoConfigOptions<S extends MongoSchemasType> {
 	configOptions?: MongoConnectOptions;
 	hooks?: (schemas: S) => void | Promise<void>;
 	logger?: any;
+	apm?: Agent;
 }
 export interface ISqlConfigOptions<M extends SqlModelsType> {
 	type: typeof SUPPORTED_DBS.SQL;
@@ -34,6 +36,7 @@ export interface ISqlConfigOptions<M extends SqlModelsType> {
 	models: M;
 	dialectOptions?: SequelizeOptions;
 	logger?: any;
+	apm?: Agent;
 }
 
 export type IMongoService<S extends MongoSchemasType> = MongoService<S> & IMongoModels<S>;
