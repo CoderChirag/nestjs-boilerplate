@@ -1,4 +1,11 @@
-import { ConnectOptions, Connection, Schema, connections, createConnection } from "mongoose";
+import {
+	ConnectOptions,
+	Connection,
+	Schema,
+	connections,
+	createConnection,
+	connect,
+} from "mongoose";
 import type { IMongoModels, IMongoService, MongoSchemasType } from "../types";
 import { IDBService } from "../interfaces";
 import { Agent } from "elastic-apm-node";
@@ -33,16 +40,15 @@ export class MongoService<S extends Record<string, Schema<any>>> implements IDBS
 	}
 
 	async connect() {
-		this.mongoConnectionRef = await this.initiateConnection(
-			this.connectionString,
-			this.configOptions,
-		);
+		this.mongoConnectionRef = (
+			await this.initiateConnection(this.connectionString, this.configOptions)
+		).connection;
 		await this.setupModels();
 	}
 
 	private async initiateConnection(connectionString: string, configOptions: ConnectOptions) {
 		try {
-			const conn = await createConnection(connectionString, configOptions);
+			const conn = await connect(connectionString, configOptions);
 			if (conn) {
 				this.logger.log("Successfully connected to mongoose!!");
 				return conn;

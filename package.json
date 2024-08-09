@@ -8,9 +8,10 @@
   "scripts": {
     "build": "lerna run build --stream",
     "graph": "nx graph",
-    "dev": "lerna run start:dev --scope app --stream",
-    "packages:dev": "lerna watch -- lerna run build --ignore app --stream",
-    "start:dev": "concurrently \"yarn packages:dev\" \"yarn dev\""
+    "dev": "lerna run dev --stream",
+    "dev:packages": "lerna watch -- lerna run build --ignore app --stream",
+    "dev:server": "lerna run start:dev --scope app --stream",
+    "start:dev": "concurrently \"yarn dev:packages\" \"yarn dev:server\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

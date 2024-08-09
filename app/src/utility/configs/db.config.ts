@@ -1,3 +1,4 @@
+import apm from "elastic-apm-node";
 import { ConfigOptions as DbConfigOptions } from "nestjs-db-service";
 import { constants } from "src/constants";
 import { SUPPORTED_DBS, DB_TYPES, IConfigModelsOrSchemas } from "db-service";
@@ -12,6 +13,7 @@ export const dbConfigs: Record<string, DbConfigOptions<DB_TYPES, IConfigModelsOr
 		connectionString: process.env.MONGO_CONNECTION_STRING!,
 		schemas: SCHEMAS.todos,
 		logger: new Logger(constants.DB_SERVICES.MONGO_DB_SERVICE),
+		apm: apm,
 	},
 	sql: {
 		providerName: constants.DB_SERVICES.SQL_DB_SERVICE,
@@ -25,5 +27,6 @@ export const dbConfigs: Record<string, DbConfigOptions<DB_TYPES, IConfigModelsOr
 			logging: process.env.NODE_ENV === "local" ?? console.log,
 		},
 		logger: new Logger(constants.DB_SERVICES.SQL_DB_SERVICE),
+		apm: apm,
 	},
 };

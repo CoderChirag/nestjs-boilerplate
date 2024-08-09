@@ -4,8 +4,12 @@
       "dependsOn": ["^build"],
       "cache": true
     },
+    "dev": {
+      "dependsOn": ["^dev"],
+      "cache": true
+    },
     "start:dev": {
-      "dependsOn": ["build"]
+      "dependsOn": ["^dev"]
     }
   }
 }
