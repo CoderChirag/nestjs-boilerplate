@@ -1,4 +1,10 @@
-import { ClassSerializerInterceptor, Controller, Get, UseInterceptors } from "@nestjs/common";
+import {
+	ClassSerializerInterceptor,
+	Controller,
+	Get,
+	NotFoundException,
+	UseInterceptors,
+} from "@nestjs/common";
 import { CLASS_SERIALIZER_OPTIONS } from "@nestjs/common/serializer/class-serializer.constants";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { BaseErrorResponseDto } from "src/dtos/error-response.dto";
@@ -26,6 +32,7 @@ export class TodosController {
 	})
 	async getAll(): Promise<TodoEntity[]> {
 		const todos = await this.todosService.getAll();
+		throw new NotFoundException("Not found");
 		return todos.map((todo) => new TodoEntity(todo));
 	}
 }

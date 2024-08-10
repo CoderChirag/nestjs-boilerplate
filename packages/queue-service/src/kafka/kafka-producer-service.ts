@@ -1,5 +1,6 @@
 import { Agent } from "elastic-apm-node";
 import { Kafka, Producer, ProducerConfig } from "kafkajs";
+import { KafkaProducerServiceError } from "..";
 
 export class KafkaProducerService {
 	private _client: Kafka;
@@ -14,5 +15,17 @@ export class KafkaProducerService {
 		this.apm = apm;
 
 		this._producer = this._client.producer(config ?? {});
+	}
+
+	async connect() {
+		try {
+			await this._producer.connect();
+			this.logger.log("Connected to Kafka Producer!!");
+		} catch (e) {
+			const err = new KafkaProducerServiceError("Error connecting to Kafka Producer", e);
+			this.logger.error(`Error connecting to Kafka Producer: ${(e as Error)?.message}`);
+			this.apm?.captureError(err);
+			throw err;
+		}
 	}
 }

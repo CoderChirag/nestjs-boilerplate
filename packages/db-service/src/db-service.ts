@@ -1,3 +1,4 @@
+import { Agent } from "elastic-apm-node";
 import { DBServiceError } from ".";
 import { SUPPORTED_DBS } from "./constants";
 import { getMongoService } from "./mongo/mongo-service";
@@ -54,6 +55,11 @@ export class DBService<T extends DB_TYPES, S extends IConfigModelsOrSchemas> {
 					apm,
 				);
 				break;
+			default:
+				const err = new DBServiceError("DB type not supported");
+				(logger as any).error(`DB type not supported: ${type}`);
+				(apm as Agent)?.captureError(err);
+				throw err;
 		}
 	}
 

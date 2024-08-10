@@ -1,4 +1,4 @@
-import { AdminConfig, ConsumerConfig, KafkaConfig, ProducerConfig } from "kafkajs";
+import { AdminConfig, KafkaConfig, ProducerConfig } from "kafkajs";
 import { Agent } from "elastic-apm-node";
 import { SUPPORTED_QUEUES } from "./constants";
 import { KafkaService } from "./kafka/kafka-service";
@@ -12,14 +12,13 @@ export interface IKafkaConfig {
 	kafkaConfig: Required<KafkaConfig, "clientId">;
 	adminConfig?: AdminConfig;
 	producerConfig?: ProducerConfig;
-	consumerConfig?: ConsumerConfig;
 	logger?: any;
 	apm?: Agent;
 }
 
-export type PubSubServiceConfig<T extends QUEUE_TYPES> = T extends typeof SUPPORTED_QUEUES.KAFKA
+export type QueueServiceConfig<T extends QUEUE_TYPES> = T extends typeof SUPPORTED_QUEUES.KAFKA
 	? IKafkaConfig
 	: never;
-export type IPubSubServiceInstance<T extends QUEUE_TYPES> = T extends typeof SUPPORTED_QUEUES.KAFKA
+export type IQueueServiceInstance<T extends QUEUE_TYPES> = T extends typeof SUPPORTED_QUEUES.KAFKA
 	? KafkaService
 	: never;

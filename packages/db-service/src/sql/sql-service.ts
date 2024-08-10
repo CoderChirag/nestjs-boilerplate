@@ -46,8 +46,8 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 			this.logger.log("Successfully Connected to Sequelize!!");
 			return conn;
 		} catch (e) {
-			const err = new SqlServiceError("Error connecting to sequelize!!", e);
-			this.logger.error("Error connecting to sequelize!!");
+			const err = new SqlServiceError("Error connecting to sequelize", e);
+			this.logger.error(`Error connecting to sequelize: ${(e as Error)?.message}`);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -69,8 +69,8 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 			await this.dbConnectionRef.authenticate();
 			return true;
 		} catch (e) {
-			const err = new SqlServiceError("Error authenticating to sequelize!!", e);
-			this.logger.error("Error authenticating to sequelize!!");
+			const err = new SqlServiceError("Error authenticating to sequelize", e);
+			this.logger.error(`Error authenticating to sequelize: ${(e as Error)?.message}`);
 			this.apm?.captureError(err);
 			return false;
 		}
@@ -81,8 +81,8 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 			await this.dbConnectionRef.close();
 			this.logger.log("Sequelize connection closed!!");
 		} catch (e) {
-			const err = new SqlServiceError("Error closing sequelize connection!!", e);
-			this.logger.error("Error closing sequelize connection!!");
+			const err = new SqlServiceError("Error closing sequelize connection", e);
+			this.logger.error(`Error closing sequelize connection: ${(e as Error)?.message}`);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -92,8 +92,8 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 		try {
 			return await this.dbConnectionRef.sync();
 		} catch (e) {
-			const err = new SqlServiceError("Error syncing sequelize connection!!", e);
-			this.logger.error("Error syncing sequelize connection!!");
+			const err = new SqlServiceError("Error syncing sequelize connection", e);
+			this.logger.error(`Error syncing sequelize connection: ${(e as Error)?.message}`);
 			this.apm?.captureError(err);
 			throw err;
 		}

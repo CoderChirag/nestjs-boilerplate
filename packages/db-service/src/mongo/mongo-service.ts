@@ -54,8 +54,8 @@ export class MongoService<S extends Record<string, Schema<any>>> implements IDBS
 				return conn;
 			}
 		} catch (e) {
-			const err = new MongoServiceError("Error connecting to mongoose!!", e);
-			this.logger.error("Error connecting to mongoose!!");
+			const err = new MongoServiceError("Error connecting to mongoose", e);
+			this.logger.error(`Error connecting to mongoose: ${(e as Error)?.message}`);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -72,8 +72,8 @@ export class MongoService<S extends Record<string, Schema<any>>> implements IDBS
 				this[modelName] = this.models[modelName];
 			}
 		} catch (e) {
-			const err = new MongoServiceError("Error setting up models!!", e);
-			this.logger.error("Error setting up models!!");
+			const err = new MongoServiceError("Error setting up models", e);
+			this.logger.error(`Error setting up models: ${(e as Error)?.message}`);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -84,8 +84,8 @@ export class MongoService<S extends Record<string, Schema<any>>> implements IDBS
 			await Promise.all(connections.map((conn) => conn.close()));
 			this.logger.log("Mongoose connection closed!!");
 		} catch (e) {
-			const err = new MongoServiceError("Error closing mongoose connection!!", e);
-			this.logger.error("Error closing mongoose connection!!");
+			const err = new MongoServiceError("Error closing mongoose connection", e);
+			this.logger.error(`Error closing mongoose connection: ${(e as Error)?.message}`);
 			this.apm?.captureError(err);
 			throw err;
 		}

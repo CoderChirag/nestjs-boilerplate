@@ -1,4 +1,5 @@
-import { Module } from "@nestjs/common";
+import apm from "elastic-apm-node";
+import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
 import { EventEmitterModule } from "@nestjs/event-emitter";
@@ -11,6 +12,7 @@ import { dbConfigs } from "src/utility/configs/db.config";
 import { loggerConfigurations } from "src/utility/configs/logger-configuration";
 import { ApiAppLifecycleService } from "./api-app-lifecycle.service";
 import { CheckApiAppHealthModule } from "src/services/health-check-service/check-api-app-health.module";
+import { QueueService } from "queue-service";
 
 @Module({
 	imports: [
@@ -32,6 +34,21 @@ import { CheckApiAppHealthModule } from "src/services/health-check-service/check
 		{
 			provide: APP_FILTER,
 			useClass: HttpExceptionFilter,
+		},
+		{
+			provide: "QUEUE_SERVICE",
+			useFactory: async () => {
+				const queue = new QueueService("kafka", {
+					kafkaConfig: {
+						clientId: "test",
+						brokers: ["127.0.0.1:9092"],
+					},
+					producerConfig: {},
+					logger: new Logger("QUEUE_SERVICE"),
+					apm,
+				});
+				await queue.getInstance().connect();
+			},
 		},
 		ApiAppLifecycleService,
 	],

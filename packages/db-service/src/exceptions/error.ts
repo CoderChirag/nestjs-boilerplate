@@ -3,7 +3,7 @@ export class DBServiceError extends Error {
 	data: unknown;
 
 	constructor(message: string, data?: unknown) {
-		super(message);
+		super(`${message}${data ? `: ${data.toString()}` : ""}`);
 		this.name = "DBServiceError";
 		this.data = data;
 	}
@@ -14,7 +14,7 @@ export class MongoServiceError extends DBServiceError {
 	data: unknown;
 
 	constructor(message: string, data?: unknown) {
-		super(message, data);
+		super(`${message}${data ? `: ${data.toString()}` : ""}`);
 		this.name = "MongoServiceError";
 		this.data = data;
 	}
@@ -25,7 +25,7 @@ export class SqlServiceError extends DBServiceError {
 	data: unknown;
 
 	constructor(message: string, data?: unknown) {
-		super(message, data);
+		super(`${message}${data ? `: ${data.toString()}` : ""}`);
 		this.name = "SqlServiceError";
 		this.data = data;
 	}
