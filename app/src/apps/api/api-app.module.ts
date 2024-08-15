@@ -11,6 +11,8 @@ import { dbConfigs } from "src/utility/configs/db.config";
 import { loggerConfigurations } from "src/utility/configs/logger-configuration";
 import { ApiAppLifecycleService } from "./api-app-lifecycle.service";
 import { CheckApiAppHealthModule } from "src/services/health-check-service/check-api-app-health.module";
+import { QueueModule } from "nestjs-queue-service";
+import { kafkaQueueConfig } from "src/utility/configs/queue.config";
 
 @Module({
 	imports: [
@@ -20,6 +22,7 @@ import { CheckApiAppHealthModule } from "src/services/health-check-service/check
 			isGlobal: true,
 		}),
 		DBModule.forRoot(dbConfigs),
+		QueueModule.forRoot(kafkaQueueConfig),
 		EventEmitterModule.forRoot(),
 		CheckApiAppHealthModule,
 		TodosModule,

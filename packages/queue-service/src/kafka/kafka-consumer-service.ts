@@ -38,6 +38,18 @@ export class KafkaConsumerService {
 		return this._consumers;
 	}
 
+	async disconnect() {
+		try {
+			await Promise.all(this._consumers.map((consumer) => consumer.disconnect()));
+			this.logger.log("[KafkaConsumer] Kafka Consumers Disconnected!!");
+		} catch (e) {
+			const err = new KafkaConsumerServiceError("Error disconnecting from Kafka Consumers", e);
+			this.logger.error(err.message);
+			this.apm?.captureError(err);
+			throw err;
+		}
+	}
+
 	async subscribe<T>(
 		consumerConfig: ConsumerConfig,
 		subscription: ConsumerSubscribeTopics,
@@ -50,7 +62,7 @@ export class KafkaConsumerService {
 					childOf: message.headers?.traceparent?.toString(),
 				});
 				transaction?.setType("kafka");
-				transaction?.setLabel("kafka.consumer.topic", topic);
+				transaction?.setLabel("kafka_consumer_topic", topic);
 				const span = transaction?.startSpan(
 					`Processing Kafka Message - ${topic}`,
 					"messaging",

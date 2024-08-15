@@ -42,6 +42,7 @@ export class KafkaService implements IQueueService {
 	async disconnect() {
 		try {
 			await this._admin.disconnect();
+			this.logger.log("Kafka Admin Disconnected!!");
 		} catch (e) {
 			const err = new KafkaServiceError("Error disconnecting from Kafka Admin", e);
 			this.logger.error(err.message);
@@ -49,6 +50,7 @@ export class KafkaService implements IQueueService {
 			throw err;
 		}
 		await this._producer.disconnect();
+		await this._consumer.disconnect();
 	}
 
 	get producer() {

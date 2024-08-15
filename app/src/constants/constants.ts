@@ -20,4 +20,7 @@ export const constants = {
 		MONGO_DB_SERVICE: "MONGO_DB_SERVICE",
 		SQL_DB_SERVICE: "SQL_DB_SERVICE",
 	},
+	QUEUE_SERVICES: {
+		KAFKA_SERVICE: "KAFKA_SERVICE",
+	},
 };

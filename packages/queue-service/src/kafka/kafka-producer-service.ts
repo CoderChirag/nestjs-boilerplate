@@ -41,6 +41,7 @@ export class KafkaProducerService implements IPublisherService {
 	async disconnect() {
 		try {
 			await this._producer.disconnect();
+			this.logger.log("[KafkaProducerService] Kafka Producer Disconnected!!");
 		} catch (e) {
 			const err = new KafkaProducerServiceError("Error disconnecting from Kafka Producer", e);
 			this.logger.error(err.message);
@@ -53,7 +54,7 @@ export class KafkaProducerService implements IPublisherService {
 		try {
 			const { key, value } = message;
 			const headers = {};
-			this.apm?.currentTransaction?.setLabel("kafka.producer.topic", topicName);
+			this.apm?.currentTransaction?.setLabel("kafka_producer_topic", topicName);
 			if (this.apm?.currentTransaction?.ids)
 				headers["transaction"] = JSON.stringify(this.apm.currentTransaction.ids);
 
