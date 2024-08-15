@@ -6,6 +6,7 @@ import { TodosService } from "./v1/todos.service";
 import { TodosControllerV2 } from "./v2/todos.controller";
 import { TodosServiceV2 } from "./v2/todos.service";
 import { QueueService } from "queue-service";
+import { TodoEntity } from "src/utility/entities/todos/todo.entity";
 
 @Module({
 	imports: [DBServicesModule],
@@ -25,6 +26,13 @@ import { QueueService } from "queue-service";
 					apm,
 				}).getInstance();
 				await queue.connect();
+				await queue.consumer.subscribe<TodoEntity>(
+					{ groupId: "todos-processor1" },
+					{ topics: ["todos-v1"], fromBeginning: true },
+					(msg) => {
+						console.log("Received Msg: ", msg);
+					},
+				);
 				return queue;
 			},
 		},

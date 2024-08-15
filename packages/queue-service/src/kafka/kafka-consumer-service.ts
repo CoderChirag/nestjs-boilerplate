@@ -4,9 +4,19 @@ import {
 	ConsumerConfig,
 	ConsumerRunConfig,
 	ConsumerSubscribeTopics,
+	IHeaders,
 	Kafka,
+	KafkaMessage,
 } from "kafkajs";
-import { KafkaConsumerRunError, KafkaConsumerServiceError, KafkaProducerService } from "..";
+import {
+	DLQ_ERROR_SOURCES,
+	IKafkaMessage,
+	IKafkaMessageProcessor,
+	IKafkaProcessorMessageArg,
+	KafkaConsumerRunError,
+	KafkaConsumerServiceError,
+	KafkaProducerService,
+} from "..";
 import { Logger } from "@repo/utility-types";
 
 export class KafkaConsumerService {
@@ -28,73 +38,45 @@ export class KafkaConsumerService {
 		return this._consumers;
 	}
 
-	async subscribe(
+	async subscribe<T>(
 		consumerConfig: ConsumerConfig,
 		subscription: ConsumerSubscribeTopics,
-		processor: (message: Object) => any,
+		processor: IKafkaMessageProcessor<T>,
+		dlqRequired: boolean = true,
 	) {
 		const runConfig: ConsumerRunConfig = {
 			eachMessage: async ({ message, topic, partition, heartbeat }) => {
 				const transaction = this.apm?.startTransaction(`Kafka Consumer - ${topic}`, {
 					childOf: message.headers?.traceparent?.toString(),
 				});
-				const span = transaction?.startSpan(`Processing Kafka Message - ${topic}`);
+				transaction?.setType("kafka");
+				transaction?.setLabel("kafka.consumer.topic", topic);
+				const span = transaction?.startSpan(
+					`Processing Kafka Message - ${topic}`,
+					"messaging",
+					"kafka",
+					"receive",
+					{ exitSpan: true },
+				);
+				span?.setServiceTarget("kafka", "todos-v1");
 				try {
+					const messageHeaders = this.parseMessageHeaders(message.headers || {});
 					this.logger.log(
 						`[KafkaConsumerService] [ConsumerRun - ${topic}] ----- EACHMESSAGES ----   ${JSON.stringify(
 							{
 								topic: topic,
 								key: message.key ? message.key.toString() : "",
 								value: message.value ? message.value.toString() : "",
-								headers: message.headers,
+								headers: messageHeaders,
 								offset: message.offset,
 								partition: partition,
 							},
 						)}`,
 					);
 
-					try {
-						this.logger.log(`[KafkaConsumerService] [ConsumerRun - ${topic}] Sending Heartbeat...`);
-						await heartbeat();
-					} catch (e) {
-						const err = new KafkaConsumerRunError(
-							topic,
-							`Error in sending heartbeat while consuming message from topic - ${topic}`,
-							e,
-						);
-						this.logger.error(err.message);
-						this.apm?.captureError(err);
-					}
-
-					try {
-						this.logger.log(`[KafkaConsumerService] [ConsumerRun - ${topic}] Decoding Message...`);
-						const msg = JSON.parse(message?.value?.toString() || "{}");
-					} catch (e) {
-						const err = new KafkaConsumerRunError(
-							topic,
-							`Error decoding message from Kafka topic - ${topic}`,
-							e,
-						);
-						this.logger.error(err.message);
-						this.apm?.captureError(err);
-						throw err;
-					}
-
-					try {
-						this.logger.log(
-							`[KafkaConsumerService] [ConsumerRun - ${topic}] Running Message Processor...`,
-						);
-						await processor(message);
-					} catch (e) {
-						const err = new KafkaConsumerRunError(
-							topic,
-							`Error running message processor on Kafka topic - ${topic}`,
-							e,
-						);
-						this.logger.error(err.message);
-						this.apm?.captureError(err);
-						throw err;
-					}
+					await this.sendHeartbeat(topic, heartbeat);
+					const decodedMsg = await this.decodeMsg<T>(topic, message);
+					await this.runProcessor<T>(topic, processor, decodedMsg);
 				} catch (e) {
 					let err = e;
 					if (!(err instanceof KafkaConsumerRunError)) {
@@ -107,7 +89,7 @@ export class KafkaConsumerService {
 						this.apm?.captureError(err as KafkaConsumerRunError);
 					}
 
-					await this.publishToDlq(topic, err as KafkaConsumerRunError);
+					if (dlqRequired) await this.publishToDlq(topic, message, err as KafkaConsumerRunError);
 				} finally {
 					span?.end();
 					transaction?.end();
@@ -115,12 +97,108 @@ export class KafkaConsumerService {
 			},
 		};
 
-		this.consume(consumerConfig, subscription, runConfig);
+		await this.consume(consumerConfig, subscription, runConfig);
 	}
 
-	private async publishToDlq(topic: string, e: KafkaConsumerRunError) {}
+	private parseMessageHeaders(headers: IHeaders) {
+		return Object.entries(headers).reduce(
+			(acc, [key, value]) => {
+				acc[key] = value?.toString();
+				return acc;
+			},
+			{} as Record<string, string | undefined>,
+		);
+	}
 
-	async consume(
+	private async sendHeartbeat(topic: string, heartbeat: () => Promise<void>) {
+		try {
+			this.logger.log(`[KafkaConsumerService] [ConsumerRun - ${topic}] Sending Heartbeat...`);
+			await heartbeat();
+		} catch (e) {
+			const err = new KafkaConsumerRunError(
+				topic,
+				`Error in sending heartbeat while consuming message from topic - ${topic}`,
+				e,
+			);
+			this.logger.error(err.message);
+			this.apm?.captureError(err);
+		}
+	}
+
+	private async decodeMsg<T>(
+		topic: string,
+		message: KafkaMessage,
+	): Promise<IKafkaProcessorMessageArg<T>> {
+		try {
+			this.logger.log(`[KafkaConsumerService] [ConsumerRun - ${topic}] Decoding Message...`);
+			return {
+				key: message.key?.toString() || "",
+				value: JSON.parse(message?.value?.toString() || "{}") as T,
+				headers: this.parseMessageHeaders(message.headers || {}),
+			};
+		} catch (e) {
+			const err = new KafkaConsumerRunError(
+				topic,
+				`Error decoding message from Kafka topic - ${topic}`,
+				e,
+			);
+			this.logger.error(err.message);
+			this.apm?.captureError(err);
+			throw err;
+		}
+	}
+
+	private async runProcessor<T>(
+		topic: string,
+		processor: IKafkaMessageProcessor<T>,
+		msg: IKafkaProcessorMessageArg<T>,
+	) {
+		try {
+			this.logger.log(
+				`[KafkaConsumerService] [ConsumerRun - ${topic}] Running Message Processor...`,
+			);
+			await processor(msg);
+		} catch (e) {
+			const err = new KafkaConsumerRunError(
+				topic,
+				`Error running message processor on Kafka topic - ${topic}`,
+				e,
+			);
+			this.logger.error(err.message);
+			this.apm?.captureError(err);
+			throw err;
+		}
+	}
+
+	private async publishToDlq(topic: string, message: KafkaMessage, error: KafkaConsumerRunError) {
+		try {
+			this.logger.log(`[KafkaConsumerService] [ConsumerRun - ${topic}] Publishing to DLQ...`);
+			const dlqMsg: IKafkaMessage = {
+				key: message.key?.toString() || DLQ_ERROR_SOURCES.CONSUMER,
+				value: {
+					body: message.value?.toString(),
+					error: {
+						name: error.name,
+						data: error.data,
+						message: error.message,
+					},
+					headers: this.parseMessageHeaders(message.headers || {}),
+					error_source: DLQ_ERROR_SOURCES.CONSUMER,
+				},
+			};
+			await this._producer.publish(`${topic}.DLQ`, dlqMsg);
+		} catch (e) {
+			const err = new KafkaConsumerRunError(
+				topic,
+				`Error publishing to DLQ for message from Kafka topic - ${topic}`,
+				e,
+			);
+			this.logger.error(err.message);
+			this.apm?.captureError(err);
+		}
+	}
+
+	private async consume(
 		consumerConfig: ConsumerConfig,
 		subscription: ConsumerSubscribeTopics,
 		runConfig: ConsumerRunConfig,
@@ -134,6 +212,10 @@ export class KafkaConsumerService {
 		await this.connect(consumer);
 		await this.subscribeTopics(consumer, subscription);
 		await this.run(consumer, subscription, runConfig);
+
+		this.logger.log(
+			`[KafkaConsumerService] Subscribed To Topics: ${subscription.topics.join(", ")}`,
+		);
 
 		this._consumers.push(consumer);
 		return consumer;
@@ -172,7 +254,8 @@ export class KafkaConsumerService {
 		try {
 			await consumer.run(runConfig);
 		} catch (e) {
-			const err = new KafkaConsumerServiceError(
+			const err = new KafkaConsumerRunError(
+				subscription.topics.join(", "),
 				`Error running Kafka Consumer for topics - ${subscription.topics}`,
 				e,
 			);

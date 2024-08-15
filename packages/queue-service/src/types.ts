@@ -17,6 +17,14 @@ export interface IKafkaConfig {
 	apm?: Agent;
 }
 
+export interface IKafkaProcessorMessageArg<T> {
+	key: string;
+	value: T;
+	headers: Record<string, string | undefined>;
+}
+
+export type IKafkaMessageProcessor<T> = (message: IKafkaProcessorMessageArg<T>) => unknown;
+
 export type QueueServiceConfig<T extends QUEUE_TYPES> = T extends typeof SUPPORTED_QUEUES.KAFKA
 	? IKafkaConfig
 	: never;

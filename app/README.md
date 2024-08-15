@@ -1,4 +1,5 @@
 Nest JS Boilerplate
+// Graceful shutdown for Queue Service
 // Add Schema Registry
 // todo: test cases
 // todo: kafka

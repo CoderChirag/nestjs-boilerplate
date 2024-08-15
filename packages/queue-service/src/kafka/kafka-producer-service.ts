@@ -53,6 +53,7 @@ export class KafkaProducerService implements IPublisherService {
 		try {
 			const { key, value } = message;
 			const headers = {};
+			this.apm?.currentTransaction?.setLabel("kafka.producer.topic", topicName);
 			if (this.apm?.currentTransaction?.ids)
 				headers["transaction"] = JSON.stringify(this.apm.currentTransaction.ids);
 
