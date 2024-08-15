@@ -3,9 +3,10 @@ import { ISqlModels, ISqlService, SqlModelsType } from "../types";
 import { IDBService } from "../interfaces";
 import { Agent } from "elastic-apm-node";
 import { SqlServiceError } from "../exceptions/error";
+import { Logger } from "@repo/utility-types";
 
 export class SqlService<T extends SqlModelsType> implements IDBService {
-	private logger: any;
+	private logger: Logger;
 	private apm?: Agent;
 	private modelsRef: T;
 	public models: ISqlModels<T> = {} as ISqlModels<T>;
@@ -18,7 +19,7 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 		connectionString: string,
 		models: T,
 		dialectOptions?: Options,
-		logger?: any,
+		logger?: Logger,
 		apm?: Agent,
 	) {
 		this.connectionString = connectionString;
@@ -47,7 +48,7 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 			return conn;
 		} catch (e) {
 			const err = new SqlServiceError("Error connecting to sequelize", e);
-			this.logger.error(`Error connecting to sequelize: ${(e as Error)?.message}`);
+			this.logger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -70,7 +71,7 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 			return true;
 		} catch (e) {
 			const err = new SqlServiceError("Error authenticating to sequelize", e);
-			this.logger.error(`Error authenticating to sequelize: ${(e as Error)?.message}`);
+			this.logger.error(err.message);
 			this.apm?.captureError(err);
 			return false;
 		}
@@ -82,7 +83,7 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 			this.logger.log("Sequelize connection closed!!");
 		} catch (e) {
 			const err = new SqlServiceError("Error closing sequelize connection", e);
-			this.logger.error(`Error closing sequelize connection: ${(e as Error)?.message}`);
+			this.logger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -93,7 +94,7 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 			return await this.dbConnectionRef.sync();
 		} catch (e) {
 			const err = new SqlServiceError("Error syncing sequelize connection", e);
-			this.logger.error(`Error syncing sequelize connection: ${(e as Error)?.message}`);
+			this.logger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}

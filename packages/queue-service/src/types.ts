@@ -2,6 +2,7 @@ import { AdminConfig, KafkaConfig, ProducerConfig } from "kafkajs";
 import { Agent } from "elastic-apm-node";
 import { SUPPORTED_QUEUES } from "./constants";
 import { KafkaService } from "./kafka/kafka-service";
+import { Logger } from "@repo/utility-types";
 export type Required<T extends Record<string, any>, K extends keyof T> = T & {
 	[P in K]-?: T[P];
 };
@@ -12,7 +13,7 @@ export interface IKafkaConfig {
 	kafkaConfig: Required<KafkaConfig, "clientId">;
 	adminConfig?: AdminConfig;
 	producerConfig?: ProducerConfig;
-	logger?: any;
+	logger?: Logger;
 	apm?: Agent;
 }
 

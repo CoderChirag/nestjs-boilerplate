@@ -1,6 +1,7 @@
 import { Agent } from "elastic-apm-node";
 import { Kafka, Partitioners, Producer, ProducerConfig } from "kafkajs";
 import { IPublisherService, KafkaProducerServiceError } from "..";
+import { Logger } from "@repo/utility-types";
 
 export interface IKafkaMessage {
 	key: string;
@@ -11,10 +12,10 @@ export class KafkaProducerService implements IPublisherService {
 	private _client: Kafka;
 	private _producer: Producer;
 
-	private logger: any;
+	private logger: Logger;
 	private apm?: Agent;
 
-	constructor(_client: Kafka, config?: ProducerConfig, logger?: any, apm?: Agent) {
+	constructor(_client: Kafka, config?: ProducerConfig, logger?: Logger, apm?: Agent) {
 		this._client = _client;
 		this.logger = logger ?? console;
 		this.apm = apm;
@@ -28,10 +29,10 @@ export class KafkaProducerService implements IPublisherService {
 	async connect() {
 		try {
 			await this._producer.connect();
-			this.logger.log("Connected to Kafka Producer!!");
+			this.logger.log("[KafkaProducerService] Connected to Kafka Producer!!");
 		} catch (e) {
 			const err = new KafkaProducerServiceError("Error connecting to Kafka Producer", e);
-			this.logger.error(`Error connecting to Kafka Producer: ${(e as Error)?.message}`);
+			this.logger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -42,7 +43,7 @@ export class KafkaProducerService implements IPublisherService {
 			await this._producer.disconnect();
 		} catch (e) {
 			const err = new KafkaProducerServiceError("Error disconnecting from Kafka Producer", e);
-			this.logger.error(`Error disconnecting from Kafka Producer: ${(e as Error)?.message}`);
+			this.logger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -52,21 +53,21 @@ export class KafkaProducerService implements IPublisherService {
 		try {
 			const { key, value } = message;
 			const headers = {};
-			if (this.apm?.currentTransaction?.ids) {
-				console.log(JSON.stringify(this.apm?.currentTransaction.ids));
+			if (this.apm?.currentTransaction?.ids)
 				headers["transaction"] = JSON.stringify(this.apm.currentTransaction.ids);
-			}
 
-			this.logger.log(`Publishing message to ${topicName}: JSON.stringify(message)`);
+			this.logger.log(
+				`[KafkaProducerService] Publishing message to ${topicName}: ${JSON.stringify(message)}`,
+			);
 			const result = await this._producer.send({
 				topic: topicName,
 				messages: [{ key, value: JSON.stringify(value), headers }],
 			});
-			this.logger.log(`Published message to ${topicName}`);
+			this.logger.log(`[KafkaProducerService] Published message to ${topicName}`);
 			return result;
 		} catch (e) {
 			const err = new KafkaProducerServiceError("Error publishing message to Kafka Producer", e);
-			this.logger.error(`Error publishing message to Kafka Producer: ${(e as Error)?.message}`);
+			this.logger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}

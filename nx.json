@@ -6,10 +6,11 @@
     },
     "dev": {
       "dependsOn": ["^dev"],
-      "cache": true
+      "cache": false
     },
     "start:dev": {
-      "dependsOn": ["^dev"]
+      "dependsOn": ["^dev"],
+      "cache": false
     }
   }
 }

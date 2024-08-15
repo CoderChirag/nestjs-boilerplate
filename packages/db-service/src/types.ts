@@ -8,6 +8,7 @@ import {
 	ConnectOptions as MongoConnectOptions,
 } from "mongoose";
 import { Agent } from "elastic-apm-node";
+import { Logger } from "@repo/utility-types";
 
 export type MongoSchemasType = Record<string, MongooseSchema>;
 export type SqlModelsType = Record<string, (db: Sequelize) => any>;
@@ -27,7 +28,7 @@ export interface IMongoConfigOptions<S extends MongoSchemasType> {
 	schemas: S;
 	configOptions?: MongoConnectOptions;
 	hooks?: (schemas: S) => void | Promise<void>;
-	logger?: any;
+	logger?: Logger;
 	apm?: Agent;
 }
 export interface ISqlConfigOptions<M extends SqlModelsType> {
@@ -35,7 +36,7 @@ export interface ISqlConfigOptions<M extends SqlModelsType> {
 	connectionString: string;
 	models: M;
 	dialectOptions?: SequelizeOptions;
-	logger?: any;
+	logger?: Logger;
 	apm?: Agent;
 }
 

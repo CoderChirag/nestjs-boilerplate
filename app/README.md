@@ -1,5 +1,4 @@
 Nest JS Boilerplate
-// Make this.logger.anything optional in every package
 // Add Schema Registry
 // todo: test cases
 // todo: kafka

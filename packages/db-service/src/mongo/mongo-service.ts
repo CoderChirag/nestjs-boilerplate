@@ -10,9 +10,10 @@ import type { IMongoModels, IMongoService, MongoSchemasType } from "../types";
 import { IDBService } from "../interfaces";
 import { Agent } from "elastic-apm-node";
 import { MongoServiceError } from "../exceptions/error";
+import { Logger } from "@repo/utility-types";
 
 export class MongoService<S extends Record<string, Schema<any>>> implements IDBService {
-	private logger: any;
+	private logger: Logger;
 	private apm?: Agent;
 
 	public schemas: S;
@@ -28,7 +29,7 @@ export class MongoService<S extends Record<string, Schema<any>>> implements IDBS
 		schemas: S,
 		configOptions?: ConnectOptions,
 		hooks?: (schemas: S) => void | Promise<void>,
-		logger?: any,
+		logger?: Logger,
 		apm?: Agent,
 	) {
 		this.connectionString = connectionString;
@@ -55,7 +56,7 @@ export class MongoService<S extends Record<string, Schema<any>>> implements IDBS
 			}
 		} catch (e) {
 			const err = new MongoServiceError("Error connecting to mongoose", e);
-			this.logger.error(`Error connecting to mongoose: ${(e as Error)?.message}`);
+			this.logger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -73,7 +74,7 @@ export class MongoService<S extends Record<string, Schema<any>>> implements IDBS
 			}
 		} catch (e) {
 			const err = new MongoServiceError("Error setting up models", e);
-			this.logger.error(`Error setting up models: ${(e as Error)?.message}`);
+			this.logger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -85,7 +86,7 @@ export class MongoService<S extends Record<string, Schema<any>>> implements IDBS
 			this.logger.log("Mongoose connection closed!!");
 		} catch (e) {
 			const err = new MongoServiceError("Error closing mongoose connection", e);
-			this.logger.error(`Error closing mongoose connection: ${(e as Error)?.message}`);
+			this.logger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}

@@ -4,6 +4,7 @@ import { Agent } from "elastic-apm-node";
 import { KafkaProducerService } from "./kafka-producer-service";
 import { KafkaConsumerService } from "./kafka-consumer-service";
 import { IQueueService } from "../interfaces";
+import { Logger } from "@repo/utility-types";
 
 export class KafkaService implements IQueueService {
 	private _client: Kafka;
@@ -11,7 +12,7 @@ export class KafkaService implements IQueueService {
 	private _producer: KafkaProducerService;
 	private _consumer: KafkaConsumerService;
 
-	private logger: any;
+	private logger: Logger;
 	private apm?: Agent;
 
 	constructor(config: IKafkaConfig) {
@@ -31,7 +32,7 @@ export class KafkaService implements IQueueService {
 			this.logger.log("Connected to Kafka Admin!!");
 		} catch (e) {
 			const err = new KafkaServiceError("Error connecting to Kafka Admin", e);
-			this.logger.error(`Error connecting to Kafka Admin: ${(e as Error)?.message}`);
+			this.logger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -43,7 +44,7 @@ export class KafkaService implements IQueueService {
 			await this._admin.disconnect();
 		} catch (e) {
 			const err = new KafkaServiceError("Error disconnecting from Kafka Admin", e);
-			this.logger.error(`Error disconnecting from Kafka Admin: ${(e as Error)?.message}`);
+			this.logger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -63,7 +64,7 @@ export class KafkaService implements IQueueService {
 			return await this._admin.listTopics();
 		} catch (e) {
 			const err = new KafkaServiceError("Error listing topics", e);
-			this.logger.error(`Error listing topics: ${(e as Error)?.message}`);
+			this.logger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -76,7 +77,7 @@ export class KafkaService implements IQueueService {
 			});
 		} catch (e) {
 			const err = new KafkaServiceError("Error creating topic", e);
-			this.logger.error(`Error creating topic: ${(e as Error)?.message}`);
+			this.logger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
