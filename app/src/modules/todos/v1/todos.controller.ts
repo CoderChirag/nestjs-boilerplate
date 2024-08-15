@@ -32,7 +32,6 @@ export class TodosController {
 	})
 	async getAll(): Promise<TodoEntity[]> {
 		const todos = await this.todosService.getAll();
-		throw new NotFoundException("Not found");
 		return todos.map((todo) => new TodoEntity(todo));
 	}
 }

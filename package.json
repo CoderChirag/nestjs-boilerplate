@@ -9,7 +9,7 @@
     "build": "lerna run build --stream",
     "graph": "nx graph",
     "dev": "lerna run dev --stream",
-    "dev:packages": "lerna watch -- lerna run dev --ignore app --stream",
+    "dev:packages": "lerna watch --ignore app -- lerna run dev --ignore app --stream",
     "dev:server": "lerna run start:dev --scope app --stream",
     "start:dev": "concurrently \"yarn dev:packages\" \"yarn dev:server\""
   },
