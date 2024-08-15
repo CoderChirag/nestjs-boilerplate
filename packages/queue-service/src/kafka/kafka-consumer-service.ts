@@ -6,7 +6,7 @@ import {
 	ConsumerSubscribeTopics,
 	Kafka,
 } from "kafkajs";
-import { KafkaConsumerServiceError, KafkaProducerService } from "..";
+import { KafkaConsumerRunError, KafkaConsumerServiceError, KafkaProducerService } from "..";
 import { Logger } from "@repo/utility-types";
 
 export class KafkaConsumerService {
@@ -57,8 +57,9 @@ export class KafkaConsumerService {
 						this.logger.log(`[KafkaConsumerService] [ConsumerRun - ${topic}] Sending Heartbeat...`);
 						await heartbeat();
 					} catch (e) {
-						const err = new KafkaConsumerServiceError(
-							`[${topic}] Error in sending heartbeat while consuming message from topic - ${topic}`,
+						const err = new KafkaConsumerRunError(
+							topic,
+							`Error in sending heartbeat while consuming message from topic - ${topic}`,
 							e,
 						);
 						this.logger.error(err.message);
@@ -69,8 +70,9 @@ export class KafkaConsumerService {
 						this.logger.log(`[KafkaConsumerService] [ConsumerRun - ${topic}] Decoding Message...`);
 						const msg = JSON.parse(message?.value?.toString() || "{}");
 					} catch (e) {
-						const err = new KafkaConsumerServiceError(
-							`[${topic}] Error decoding message from Kafka topic - ${topic}`,
+						const err = new KafkaConsumerRunError(
+							topic,
+							`Error decoding message from Kafka topic - ${topic}`,
 							e,
 						);
 						this.logger.error(err.message);
@@ -84,7 +86,8 @@ export class KafkaConsumerService {
 						);
 						await processor(message);
 					} catch (e) {
-						const err = new KafkaConsumerServiceError(
+						const err = new KafkaConsumerRunError(
+							topic,
 							`Error running message processor on Kafka topic - ${topic}`,
 							e,
 						);
@@ -93,12 +96,18 @@ export class KafkaConsumerService {
 						throw err;
 					}
 				} catch (e) {
-					await this.publishToDlq(
-						topic,
-						e instanceof Error
-							? e
-							: new KafkaConsumerServiceError((e as any)?.toString() || "Unknown Error"),
-					);
+					let err = e;
+					if (!(err instanceof KafkaConsumerRunError)) {
+						err = new KafkaConsumerRunError(
+							topic,
+							e instanceof Error ? e.message : new Error(e?.toString() || "Unknown Error").message,
+							e,
+						);
+						this.logger.error((err as KafkaConsumerRunError).message);
+						this.apm?.captureError(err as KafkaConsumerRunError);
+					}
+
+					await this.publishToDlq(topic, err as KafkaConsumerRunError);
 				} finally {
 					span?.end();
 					transaction?.end();
@@ -109,7 +118,7 @@ export class KafkaConsumerService {
 		this.consume(consumerConfig, subscription, runConfig);
 	}
 
-	private async publishToDlq(topic: string, e: Error) {}
+	private async publishToDlq(topic: string, e: KafkaConsumerRunError) {}
 
 	async consume(
 		consumerConfig: ConsumerConfig,

@@ -41,3 +41,14 @@ export class KafkaConsumerServiceError extends KafkaServiceError {
 		this.data = data;
 	}
 }
+
+export class KafkaConsumerRunError extends KafkaConsumerServiceError {
+	name: string;
+	data: unknown;
+
+	constructor(topic: string, message: string, data?: unknown) {
+		super(`[${topic}] ${message}${data ? `: ${data.toString()}` : ""}`);
+		this.name = "KafkaConsumerRunError";
+		this.data = data;
+	}
+}
