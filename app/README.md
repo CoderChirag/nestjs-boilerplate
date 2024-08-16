@@ -1,5 +1,4 @@
 Nest JS Boilerplate
-// Env Validations
 // Decorators for Consumer
 // Add Schema Registry
 // todo: test cases

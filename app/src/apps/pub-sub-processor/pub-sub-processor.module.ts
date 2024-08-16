@@ -1,5 +1,4 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
 import { APP_FILTER } from "@nestjs/core";
 import { DBModule } from "nestjs-db-service";
 import { LoggerModule } from "nestjs-pino";
@@ -12,14 +11,20 @@ import { kafkaQueueConfig } from "src/utility/configs/queue.config";
 import { PubSubProcessorService } from "./pub-sub-processor.service";
 import { ScheduleModule } from "@nestjs/schedule";
 import { TodosProcessorModule } from "src/modules/todos-processor/todos-processor.module";
+import { ConfigurationServiceModule } from "src/services/configuration-service/configuration-service.module";
+import {
+	ProcessorAppEnvSchema,
+	processorAppEnvTransformer,
+} from "src/dtos/processor-app-env.schema";
 
 @Module({
 	imports: [
 		LoggerModule.forRoot(loggerConfigurations),
-		ConfigModule.forRoot({
-			ignoreEnvFile: true,
-			isGlobal: true,
-		}),
+		ConfigurationServiceModule.forRoot(
+			ProcessorAppEnvSchema,
+			process.env,
+			processorAppEnvTransformer,
+		),
 		ScheduleModule.forRoot(),
 		DBModule.forRoot(dbConfigs),
 		QueueModule.forRoot(kafkaQueueConfig),

@@ -27,4 +27,5 @@ export const constants = {
 	QUEUE_SERVICES: {
 		KAFKA_SERVICE: "KAFKA_SERVICE",
 	},
+	CONFIGURATION_SERVICE: "ConfigurationService",
 };

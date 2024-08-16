@@ -1,5 +1,4 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
 import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { LoggerModule } from "nestjs-pino";
@@ -13,14 +12,13 @@ import { ApiAppLifecycleService } from "./api-app-lifecycle.service";
 import { CheckApiAppHealthModule } from "src/services/health-check-service/check-api-app-health.module";
 import { QueueModule } from "nestjs-queue-service";
 import { kafkaQueueConfig } from "src/utility/configs/queue.config";
+import { ConfigurationServiceModule } from "src/services/configuration-service/configuration-service.module";
+import { ApiAppEnvSchema, apiAppEnvTransformer } from "src/dtos/api-app-env.schema";
 
 @Module({
 	imports: [
 		LoggerModule.forRoot(loggerConfigurations),
-		ConfigModule.forRoot({
-			ignoreEnvFile: true,
-			isGlobal: true,
-		}),
+		ConfigurationServiceModule.forRoot(ApiAppEnvSchema, process.env, apiAppEnvTransformer),
 		DBModule.forRoot(dbConfigs),
 		QueueModule.forRoot(kafkaQueueConfig),
 		EventEmitterModule.forRoot(),

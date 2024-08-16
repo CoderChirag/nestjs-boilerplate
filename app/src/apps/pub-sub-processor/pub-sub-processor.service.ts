@@ -15,6 +15,7 @@ import { DBServicesProvider } from "src/services/db-services/db-services.provide
 import { sigUsrAndSigtermTimeDiffLog } from "src/utility/utility-functions.util";
 import { Interval } from "@nestjs/schedule";
 import { TodosProcessorService } from "src/modules/todos-processor/todos-processor.service";
+import { ProcessorAppEnvSchema } from "src/dtos/processor-app-env.schema";
 
 @Injectable()
 export class PubSubProcessorService implements OnApplicationBootstrap, OnApplicationShutdown {
@@ -23,7 +24,7 @@ export class PubSubProcessorService implements OnApplicationBootstrap, OnApplica
 
 	constructor(
 		@Inject(constants.QUEUE_SERVICES.KAFKA_SERVICE) private readonly kafkaService: KafkaService,
-		private readonly configService: ConfigService,
+		@Inject(constants.CONFIGURATION_SERVICE) private readonly configService: ProcessorAppEnvSchema,
 		private readonly dbServicesProvider: DBServicesProvider,
 		private readonly todoProcessorService: TodosProcessorService,
 	) {}
@@ -38,16 +39,14 @@ export class PubSubProcessorService implements OnApplicationBootstrap, OnApplica
 			this.usrSigTime = Date.now();
 			this.logger.log("SIGUSR1 signal received.");
 			await this.kafkaService.disconnect();
-			this.logger.log(
-				`${this.configService.get("APP_NAME")}: All consumers for this pod are paused`,
-			);
+			this.logger.log(`${this.configService.APP_NAME}: All consumers for this pod are paused`);
 		});
 
 		await this.kafkaService.consumer.subscribe(
 			{
-				groupId: this.configService.get("TODOS_PROCESSOR_GROUP_ID")!,
+				groupId: this.configService.TODOS_PROCESSOR_GROUP_ID,
 			},
-			{ topics: this.configService.get("TODOS_PROCESSOR_TOPICS")!.split(",") },
+			{ topics: this.configService.TODOS_PROCESSOR_TOPICS.split(",") },
 			this.todoProcessorService.processTodos,
 			true,
 			this.todoProcessorService.logger,
