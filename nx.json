@@ -11,6 +11,10 @@
     "start:dev": {
       "dependsOn": ["^dev"],
       "cache": false
+    },
+    "start:consumer-dev": {
+      "dependsOn": ["^dev"],
+      "cache": false
     }
   }
 }

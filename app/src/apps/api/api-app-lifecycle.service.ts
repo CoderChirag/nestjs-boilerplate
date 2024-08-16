@@ -1,8 +1,7 @@
 import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { constants } from "src/constants";
-import { sigUsrAndSigtermTimeDiffLog } from "src/utility/common.util";
-import { setTimeout } from "timers/promises";
+import { sigUsrAndSigtermTimeDiffLog } from "src/utility/utility-functions.util";
 
 @Injectable()
 export class ApiAppLifecycleService implements OnApplicationBootstrap, OnApplicationShutdown {

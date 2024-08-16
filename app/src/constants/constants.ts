@@ -2,12 +2,16 @@ export const constants = {
 	INFRA: {
 		APP_NAMES: {
 			API_APP: "api-app",
+			CONSUMER_APP: "consumer-app",
 		},
 		HEALTH_CHECKS: {
 			SHUTDOWN_CHECK: "shutDownCheck",
 			DB_SERVICES_STATUS_CHECK: "dbServicesStatusCheck",
 		},
 		SHUTDOWN_EVENT: "SHUTDOWN_EVENT",
+		LIVENESS: {
+			FILE_PATH: "liveness/liveness.txt",
+		},
 	},
 	SWAGGER: {
 		TITLE: "Nestjs Boilerplate",

@@ -10,9 +10,11 @@ import {
 } from "kafkajs";
 import {
 	DLQ_ERROR_SOURCES,
+	DropFirst,
 	IKafkaMessage,
 	IKafkaMessageProcessor,
-	IKafkaProcessorMessageArg,
+	IKafkaMessageProcessorMessageArg,
+	InferKafkaMessageProcessorMessageArgValue,
 	KafkaConsumerRunError,
 	KafkaConsumerServiceError,
 	KafkaProducerService,
@@ -50,11 +52,12 @@ export class KafkaConsumerService {
 		}
 	}
 
-	async subscribe<T>(
+	async subscribe<T extends IKafkaMessageProcessor>(
 		consumerConfig: ConsumerConfig,
 		subscription: ConsumerSubscribeTopics,
-		processor: IKafkaMessageProcessor<T>,
+		processor: T,
 		dlqRequired: boolean = true,
+		...args: DropFirst<Parameters<T>>
 	) {
 		const runConfig: ConsumerRunConfig = {
 			eachMessage: async ({ message, topic, partition, heartbeat }) => {
@@ -87,8 +90,10 @@ export class KafkaConsumerService {
 					);
 
 					await this.sendHeartbeat(topic, heartbeat);
-					const decodedMsg = await this.decodeMsg<T>(topic, message);
-					await this.runProcessor<T>(topic, processor, decodedMsg);
+					const decodedMsg = await this.decodeMsg<
+						InferKafkaMessageProcessorMessageArgValue<Parameters<T>[0]>
+					>(topic, message);
+					await this.runProcessor<T>(topic, processor, decodedMsg, ...args);
 				} catch (e) {
 					let err = e;
 					if (!(err instanceof KafkaConsumerRunError)) {
@@ -140,7 +145,7 @@ export class KafkaConsumerService {
 	private async decodeMsg<T>(
 		topic: string,
 		message: KafkaMessage,
-	): Promise<IKafkaProcessorMessageArg<T>> {
+	): Promise<IKafkaMessageProcessorMessageArg<T>> {
 		try {
 			this.logger.log(`[KafkaConsumerService] [ConsumerRun - ${topic}] Decoding Message...`);
 			return {
@@ -160,16 +165,17 @@ export class KafkaConsumerService {
 		}
 	}
 
-	private async runProcessor<T>(
+	private async runProcessor<T extends IKafkaMessageProcessor>(
 		topic: string,
-		processor: IKafkaMessageProcessor<T>,
-		msg: IKafkaProcessorMessageArg<T>,
+		processor: T,
+		msg: Parameters<T>[0],
+		...args: DropFirst<Parameters<T>>
 	) {
 		try {
 			this.logger.log(
 				`[KafkaConsumerService] [ConsumerRun - ${topic}] Running Message Processor...`,
 			);
-			await processor(msg);
+			await processor(msg, ...args);
 		} catch (e) {
 			const err = new KafkaConsumerRunError(
 				topic,

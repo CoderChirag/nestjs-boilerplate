@@ -4,6 +4,7 @@ import { constants } from "./constants/constants";
 import { NestFactory } from "@nestjs/core";
 import { ApiAppModule } from "./apps/api/api-app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { PubSubProcessorModule } from "./apps/pub-sub-processor/pub-sub-processor.module";
 
 export class AppModule {
 	static async init() {
@@ -34,6 +35,9 @@ export class AppModule {
 					jsonDocumentUrl: constants.SWAGGER.JSON_DOCUMENTATION_PATH,
 				});
 				break;
+			case INFRA.APP_NAMES.CONSUMER_APP:
+				app = await NestFactory.create(PubSubProcessorModule, { bufferLogs: true });
+				app.enableShutdownHooks();
 			default:
 				break;
 		}

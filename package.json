@@ -11,7 +11,9 @@
     "dev": "lerna run dev --stream",
     "dev:packages": "lerna watch --ignore app -- lerna run dev --ignore app --stream",
     "dev:server": "lerna run start:dev --scope app --stream",
-    "start:dev": "concurrently \"yarn dev:packages\" \"yarn dev:server\""
+    "dev:consumer": "lerna run start:consumer-dev --scope app --stream",
+    "start:dev": "concurrently \"yarn dev:packages\" \"yarn dev:server\"",
+    "start:consumer-dev": "concurrently \"yarn dev:packages\" \"yarn dev:consumer\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
