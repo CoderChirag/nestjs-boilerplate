@@ -8,7 +8,6 @@ import {
 	OnApplicationBootstrap,
 	OnApplicationShutdown,
 } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { KafkaService } from "queue-service";
 import { constants } from "src/constants";
 import { DBServicesProvider } from "src/services/db-services/db-services.provider";
@@ -44,11 +43,25 @@ export class PubSubProcessorService implements OnApplicationBootstrap, OnApplica
 
 		await this.kafkaService.consumer.subscribe(
 			{
-				groupId: this.configService.TODOS_PROCESSOR_GROUP_ID,
+				groupId: constants.INFRA.CONSUMER_GROUPS.TODOS_SQL.GROUP_ID,
 			},
-			{ topics: this.configService.TODOS_PROCESSOR_TOPICS.split(",") },
+			{
+				topics: constants.INFRA.CONSUMER_GROUPS.TODOS_SQL.TOPICS,
+				dlqRequired: true,
+				schemaEnabled: true,
+			},
 			this.todoProcessorService.processTodos,
-			true,
+			this.todoProcessorService.logger,
+		);
+
+		await this.kafkaService.consumer.subscribe(
+			{ groupId: constants.INFRA.CONSUMER_GROUPS.TODOS_MONGO.GROUP_ID },
+			{
+				topics: constants.INFRA.CONSUMER_GROUPS.TODOS_MONGO.TOPICS,
+				dlqRequired: true,
+				schemaEnabled: true,
+			},
+			this.todoProcessorService.processTodos,
 			this.todoProcessorService.logger,
 		);
 

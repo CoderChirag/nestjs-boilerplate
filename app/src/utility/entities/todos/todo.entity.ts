@@ -31,6 +31,24 @@ export class TodoEntity {
 	})
 	status: TodoStatus;
 
+	@Expose()
+	@ApiProperty({
+		type: "string",
+		required: false,
+		example: "2021-09-09",
+		description: "The creation date",
+	})
+	createdAt?: string;
+
+	@Expose()
+	@ApiProperty({
+		type: "string",
+		required: false,
+		example: "2021-09-09",
+		description: "The updation date",
+	})
+	updatedAt?: string;
+
 	constructor(partial: Partial<TodoEntity>) {
 		Object.assign(this, partial);
 	}

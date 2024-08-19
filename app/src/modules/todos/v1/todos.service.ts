@@ -1,7 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { KafkaConsumerService, KafkaProducerService, KafkaService } from "queue-service";
+import { KafkaProducerService, KafkaService } from "queue-service";
 import { constants } from "src/constants";
-import { ApiAppEnvSchema } from "src/dtos/api-app-env.schema";
 import { ITodoService } from "src/services/db-services/todo/todo.interface";
 import { TodoRepository } from "src/services/db-services/todo/todo.repository";
 
@@ -11,20 +10,25 @@ export class TodosService {
 	private kafkaProducerService: KafkaProducerService;
 
 	constructor(
-		@Inject(constants.CONFIGURATION_SERVICE) private readonly configService: ApiAppEnvSchema,
-		private readonly todoRepository: TodoRepository,
+		_todoRepository: TodoRepository,
 		@Inject(constants.QUEUE_SERVICES.KAFKA_SERVICE) _queueService: KafkaService,
 	) {
-		this.dbService = todoRepository.getSqlService();
+		this.dbService = _todoRepository.getSqlService();
 		this.kafkaProducerService = _queueService.producer;
 	}
 
 	async getAll() {
 		const todos = await this.dbService.findAll();
-		await this.kafkaProducerService.publish(this.configService.SQL_TODOS_PUBLISH_TOPIC, {
-			key: "todos",
-			value: todos[0],
-		});
+		todos[0].createdAt = todos[0]?.createdAt?.toString() ?? "";
+		todos[0].updatedAt = todos[0]?.updatedAt?.toString() ?? "";
+		await this.kafkaProducerService.publish(
+			constants.INFRA.PUBLISH_TOPICS.TODOS_SQL,
+			{
+				key: "todos",
+				value: todos[0],
+			},
+			true,
+		);
 		return todos;
 	}
 }

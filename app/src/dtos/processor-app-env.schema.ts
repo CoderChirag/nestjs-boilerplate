@@ -39,12 +39,9 @@ export class ProcessorAppEnvSchema {
 	KAFKA_CLIENT_ID: string;
 	@IsString()
 	KAFKA_BROKERS: string;
+	@IsString()
+	SCHEMA_REGISTRY_HOST: string;
 
 	@IsNumber()
 	LIVENESS_WRITE_INTERVAL: number;
-
-	@IsString()
-	TODOS_PROCESSOR_GROUP_ID: string;
-	@IsString()
-	TODOS_PROCESSOR_TOPICS: string;
 }

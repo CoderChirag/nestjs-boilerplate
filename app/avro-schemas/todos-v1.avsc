@@ -1,0 +1,39 @@
+{
+	"type": "record",
+	"name": "TodosSqlEntity",
+	"namespace": "todos",
+	"fields": [
+		{
+			"name": "_id",
+			"type": "int"
+		},
+		{
+			"name": "title",
+			"type": "string"
+		},
+		{
+			"name": "description",
+			"type": "string"
+		},
+		{
+			"name": "priority",
+			"type": "int"
+		},
+		{
+			"name": "status",
+			"type": {
+				"type": "enum",
+				"name": "Status",
+				"symbols": ["ToDo", "Doing", "Done", "Dropped"]
+			}
+		},
+		{
+			"name": "createdAt",
+			"type": "string"
+		},
+		{
+			"name": "updatedAt",
+			"type": "string"
+		}
+	]
+}

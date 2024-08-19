@@ -14,24 +14,34 @@ import {
 	IKafkaMessage,
 	IKafkaMessageProcessor,
 	IKafkaMessageProcessorMessageArg,
+	IKafkaSubscriptionConfig,
 	InferKafkaMessageProcessorMessageArgValue,
 	KafkaConsumerRunError,
 	KafkaConsumerServiceError,
 	KafkaProducerService,
 } from "..";
 import { Logger } from "@repo/utility-types";
+import { SchemaRegistry } from "@kafkajs/confluent-schema-registry";
 
 export class KafkaConsumerService {
 	private _client: Kafka;
 	private _producer: KafkaProducerService;
+	private _schemaRegistry: SchemaRegistry;
 	private _consumers: Consumer[] = [];
 
 	private logger: Logger;
 	private apm?: Agent;
 
-	constructor(_client: Kafka, _producer: KafkaProducerService, logger?: Logger, apm?: Agent) {
+	constructor(
+		_client: Kafka,
+		_producer: KafkaProducerService,
+		_schemaRegistry: SchemaRegistry,
+		logger?: Logger,
+		apm?: Agent,
+	) {
 		this._client = _client;
 		this._producer = _producer;
+		this._schemaRegistry = _schemaRegistry;
 		this.logger = logger ?? console;
 		this.apm = apm;
 	}
@@ -54,11 +64,11 @@ export class KafkaConsumerService {
 
 	async subscribe<T extends IKafkaMessageProcessor>(
 		consumerConfig: ConsumerConfig,
-		subscription: ConsumerSubscribeTopics,
+		subscription: IKafkaSubscriptionConfig,
 		processor: T,
-		dlqRequired: boolean = true,
 		...args: DropFirst<Parameters<T>>
 	) {
+		const { topics, fromBeginning, dlqRequired, schemaEnabled } = subscription;
 		const runConfig: ConsumerRunConfig = {
 			eachMessage: async ({ message, topic, partition, heartbeat }) => {
 				const transaction = this.apm?.startTransaction(`Kafka Consumer - ${topic}`, {
@@ -73,7 +83,7 @@ export class KafkaConsumerService {
 					"receive",
 					{ exitSpan: true },
 				);
-				span?.setServiceTarget("kafka", "todos-v1");
+				span?.setServiceTarget("kafka", topic);
 				try {
 					const messageHeaders = this.parseMessageHeaders(message.headers || {});
 					this.logger.log(
@@ -92,7 +102,7 @@ export class KafkaConsumerService {
 					await this.sendHeartbeat(topic, heartbeat);
 					const decodedMsg = await this.decodeMsg<
 						InferKafkaMessageProcessorMessageArgValue<Parameters<T>[0]>
-					>(topic, message);
+					>(topic, message, schemaEnabled);
 					await this.runProcessor<T>(topic, processor, decodedMsg, ...args);
 				} catch (e) {
 					let err = e;
@@ -114,7 +124,7 @@ export class KafkaConsumerService {
 			},
 		};
 
-		await this.consume(consumerConfig, subscription, runConfig);
+		await this.consume(consumerConfig, { topics, fromBeginning }, runConfig);
 	}
 
 	private parseMessageHeaders(headers: IHeaders) {
@@ -145,12 +155,17 @@ export class KafkaConsumerService {
 	private async decodeMsg<T>(
 		topic: string,
 		message: KafkaMessage,
+		schemaEnabled: boolean = false,
 	): Promise<IKafkaMessageProcessorMessageArg<T>> {
 		try {
 			this.logger.log(`[KafkaConsumerService] [ConsumerRun - ${topic}] Decoding Message...`);
 			return {
 				key: message.key?.toString() || "",
-				value: JSON.parse(message?.value?.toString() || "{}") as T,
+				value: message.value
+					? schemaEnabled
+						? ((await this._schemaRegistry.decode(message.value)) as T)
+						: (JSON.parse(message.value?.toString()) as T)
+					: ({} as T),
 				headers: this.parseMessageHeaders(message.headers || {}),
 			};
 		} catch (e) {

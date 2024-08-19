@@ -12,6 +12,20 @@ export const constants = {
 		LIVENESS: {
 			FILE_PATH: "liveness/liveness.txt",
 		},
+		PUBLISH_TOPICS: {
+			TODOS_SQL: `todos-v1-${process.env.NODE_ENV}`,
+			TODOS_MONGO: `todos-v2-${process.env.NODE_ENV}`,
+		},
+		CONSUMER_GROUPS: {
+			TODOS_SQL: {
+				GROUP_ID: `todos-v1-processor-${process.env.NODE_ENV}`,
+				TOPICS: [`todos-v1-${process.env.NODE_ENV}`],
+			},
+			TODOS_MONGO: {
+				GROUP_ID: `todos-v2-processor-${process.env.NODE_ENV}`,
+				TOPICS: [`todos-v2-${process.env.NODE_ENV}`],
+			},
+		},
 	},
 	SWAGGER: {
 		TITLE: "Nestjs Boilerplate",

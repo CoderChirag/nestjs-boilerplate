@@ -2,6 +2,7 @@ import { Agent } from "elastic-apm-node";
 import { Kafka, Partitioners, Producer, ProducerConfig } from "kafkajs";
 import { IPublisherService, KafkaProducerServiceError } from "..";
 import { Logger } from "@repo/utility-types";
+import { SchemaRegistry } from "@kafkajs/confluent-schema-registry";
 
 export interface IKafkaMessage {
 	key: string;
@@ -10,13 +11,21 @@ export interface IKafkaMessage {
 
 export class KafkaProducerService implements IPublisherService {
 	private _client: Kafka;
+	private _schemaRegistry: SchemaRegistry;
 	private _producer: Producer;
 
 	private logger: Logger;
 	private apm?: Agent;
 
-	constructor(_client: Kafka, config?: ProducerConfig, logger?: Logger, apm?: Agent) {
+	constructor(
+		_client: Kafka,
+		_schemaRegistry: SchemaRegistry,
+		config?: ProducerConfig,
+		logger?: Logger,
+		apm?: Agent,
+	) {
 		this._client = _client;
+		this._schemaRegistry = _schemaRegistry;
 		this.logger = logger ?? console;
 		this.apm = apm;
 
@@ -50,7 +59,7 @@ export class KafkaProducerService implements IPublisherService {
 		}
 	}
 
-	async publish(topicName: string, message: IKafkaMessage) {
+	async publish(topicName: string, message: IKafkaMessage, schemaEnabled: boolean = false) {
 		try {
 			const { key, value } = message;
 			const headers = {};
@@ -61,9 +70,21 @@ export class KafkaProducerService implements IPublisherService {
 			this.logger.log(
 				`[KafkaProducerService] Publishing message to ${topicName}: ${JSON.stringify(message)}`,
 			);
+			console.log(schemaEnabled);
 			const result = await this._producer.send({
 				topic: topicName,
-				messages: [{ key, value: JSON.stringify(value), headers }],
+				messages: [
+					{
+						key,
+						value: schemaEnabled
+							? await this._schemaRegistry.encode(
+									await this._schemaRegistry.getLatestSchemaId(topicName),
+									value,
+								)
+							: JSON.stringify(value),
+						headers,
+					},
+				],
 			});
 			this.logger.log(`[KafkaProducerService] Published message to ${topicName}`);
 			return result;

@@ -1,6 +1,5 @@
 Nest JS Boilerplate
-// Decorators for Consumer
-// Add Schema Registry
+// Add @Consumer Decorator for Processors
 // todo: test cases
 // todo: kafka
 // todo: redis

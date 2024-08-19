@@ -11,5 +11,12 @@ export class TodosProcessorService {
 		logger.log(`Message Headers: ${JSON.stringify(headers, null, 2)}`);
 		logger.log(`Message Key: ${key}`);
 		logger.log(`Message Value: ${JSON.stringify(value, null, 2)}`);
+		logger.log(
+			message.value._id,
+			message.value.title,
+			message.value.description,
+			message.value.priority,
+			message.value.status,
+		);
 	}
 }

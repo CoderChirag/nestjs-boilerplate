@@ -1,0 +1,31 @@
+{
+	"type": "record",
+	"name": "TodosMongoEntity",
+	"namespace": "todos",
+	"fields": [
+		{
+			"name": "_id",
+			"type": "string"
+		},
+		{
+			"name": "title",
+			"type": "string"
+		},
+		{
+			"name": "description",
+			"type": "string"
+		},
+		{
+			"name": "priority",
+			"type": "int"
+		},
+		{
+			"name": "status",
+			"type": {
+				"type": "enum",
+				"name": "Status",
+				"symbols": ["ToDo", "Doing", "Done", "Dropped"]
+			}
+		}
+	]
+}

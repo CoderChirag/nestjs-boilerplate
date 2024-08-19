@@ -3,6 +3,9 @@ import { Agent } from "elastic-apm-node";
 import { SUPPORTED_QUEUES } from "./constants";
 import { KafkaService } from "./kafka/kafka-service";
 import { Logger } from "@repo/utility-types";
+import { SchemaRegistryAPIClientArgs } from "@kafkajs/confluent-schema-registry/dist/api";
+import { SchemaRegistryAPIClientOptions } from "@kafkajs/confluent-schema-registry/dist/@types";
+import { COMPATIBILITY } from "@kafkajs/confluent-schema-registry";
 
 export type Required<T extends Record<string, any>, K extends keyof T> = T & {
 	[P in K]-?: T[P];
@@ -15,8 +18,25 @@ export interface IKafkaConfig {
 	kafkaConfig: Required<KafkaConfig, "clientId">;
 	adminConfig?: AdminConfig;
 	producerConfig?: ProducerConfig;
+	schemaRegistryConfig: {
+		args: SchemaRegistryAPIClientArgs;
+		options?: SchemaRegistryAPIClientOptions;
+	};
 	logger?: Logger;
 	apm?: Agent;
+}
+
+export interface ISchemaRegistryOptions {
+	compatibility?: COMPATIBILITY;
+	separator?: string;
+	subject: string;
+}
+
+export interface IKafkaSubscriptionConfig {
+	topics: (string | RegExp)[];
+	fromBeginning?: boolean;
+	dlqRequired?: boolean;
+	schemaEnabled?: boolean;
 }
 
 export interface IKafkaMessageProcessorMessageArg<T> {

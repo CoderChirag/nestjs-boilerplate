@@ -12,6 +12,9 @@ export const kafkaQueueConfig: QueueConfig<typeof SUPPORTED_QUEUES.KAFKA> = {
 			clientId: process.env.KAFKA_CLIENT_ID!,
 			brokers: process.env.KAFKA_BROKERS!.split(","),
 		},
+		schemaRegistryConfig: {
+			args: { host: process.env.SCHEMA_REGISTRY_HOST! },
+		},
 		logger: new Logger(constants.QUEUE_SERVICES.KAFKA_SERVICE),
 		apm,
 		adminConfig: {},

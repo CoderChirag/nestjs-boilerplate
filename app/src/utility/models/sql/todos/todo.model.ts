@@ -14,6 +14,8 @@ export class Todo extends Model<InferAttributes<Todo>, InferCreationAttributes<T
 	declare description: string;
 	declare priority: number;
 	declare status: TodoStatus;
+	declare readonly createdAt: string;
+	declare readonly updatedAt: string;
 }
 
 export const TodoModel = (sequelize: Sequelize) => {
@@ -41,6 +43,16 @@ export const TodoModel = (sequelize: Sequelize) => {
 				allowNull: false,
 				values: Object.values(TodoStatus),
 				defaultValue: TodoStatus.TO_DO,
+			},
+			createdAt: {
+				type: DataTypes.DATE,
+				allowNull: false,
+				defaultValue: DataTypes.NOW,
+			},
+			updatedAt: {
+				type: DataTypes.DATE,
+				allowNull: false,
+				defaultValue: DataTypes.NOW,
 			},
 		},
 		{

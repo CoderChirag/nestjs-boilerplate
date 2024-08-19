@@ -39,5 +39,5 @@ export class ApiAppEnvSchema {
 	KAFKA_BROKERS: string;
 
 	@IsString()
-	SQL_TODOS_PUBLISH_TOPIC: string;
+	SCHEMA_REGISTRY_HOST: string;
 }
