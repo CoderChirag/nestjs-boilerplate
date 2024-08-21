@@ -40,4 +40,7 @@ export class ApiAppEnvSchema {
 
 	@IsString()
 	SCHEMA_REGISTRY_HOST: string;
+
+	@IsString()
+	ASB_CONNECTION_STRING: string;
 }

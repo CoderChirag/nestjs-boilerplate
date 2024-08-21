@@ -11,7 +11,7 @@ import { loggerConfigurations } from "src/utility/configs/logger-configuration";
 import { ApiAppLifecycleService } from "./api-app-lifecycle.service";
 import { CheckApiAppHealthModule } from "src/services/health-check-service/check-api-app-health.module";
 import { QueueModule } from "nestjs-queue-service";
-import { kafkaQueueConfig } from "src/utility/configs/queue.config";
+import { asbQueueConfig, kafkaQueueConfig } from "src/utility/configs/queue.config";
 import { ConfigurationServiceModule } from "src/services/configuration-service/configuration-service.module";
 import { ApiAppEnvSchema, apiAppEnvTransformer } from "src/dtos/api-app-env.schema";
 
@@ -21,6 +21,7 @@ import { ApiAppEnvSchema, apiAppEnvTransformer } from "src/dtos/api-app-env.sche
 		ConfigurationServiceModule.forRoot(ApiAppEnvSchema, process.env, apiAppEnvTransformer),
 		DBModule.forRoot(dbConfigs),
 		QueueModule.forRoot(kafkaQueueConfig),
+		QueueModule.forRoot(asbQueueConfig),
 		EventEmitterModule.forRoot(),
 		CheckApiAppHealthModule,
 		TodosModule,

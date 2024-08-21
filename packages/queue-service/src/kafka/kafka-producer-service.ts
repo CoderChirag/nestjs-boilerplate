@@ -1,15 +1,15 @@
 import { Agent } from "elastic-apm-node";
 import { Kafka, Partitioners, Producer, ProducerConfig } from "kafkajs";
-import { IPublisherService, KafkaProducerServiceError } from "..";
+import { KafkaProducerServiceError } from "..";
 import { Logger } from "@repo/utility-types";
 import { SchemaRegistry } from "@kafkajs/confluent-schema-registry";
 
 export interface IKafkaMessage {
 	key: string;
-	value: Object;
+	value: object;
 }
 
-export class KafkaProducerService implements IPublisherService {
+export class KafkaProducerService {
 	private _client: Kafka;
 	private _schemaRegistry: SchemaRegistry;
 	private _producer: Producer;

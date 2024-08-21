@@ -10,9 +10,9 @@ export const QueueProvider = <T extends QUEUE_TYPES>(
 		provide: name,
 		useFactory: async () => {
 			const queueService = new QueueService<T>(type, config).getInstance();
-			await queueService.connect();
+			if ("connect" in queueService) await queueService.connect();
 			(queueService as any).onApplicationShutdown = async () => {
-				await queueService.disconnect();
+				if ("disconnect" in queueService) await queueService.disconnect();
 			};
 			return queueService;
 		},

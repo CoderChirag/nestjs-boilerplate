@@ -6,6 +6,9 @@ import { Logger } from "@repo/utility-types";
 import { SchemaRegistryAPIClientArgs } from "@kafkajs/confluent-schema-registry/dist/api";
 import { SchemaRegistryAPIClientOptions } from "@kafkajs/confluent-schema-registry/dist/@types";
 import { COMPATIBILITY } from "@kafkajs/confluent-schema-registry";
+import { ServiceBusClientOptions, TokenCredential } from "@azure/service-bus";
+import { NamedKeyCredential, SASCredential } from "@azure/core-auth";
+import { ASBService } from "./asb";
 
 export type Required<T extends Record<string, any>, K extends keyof T> = T & {
 	[P in K]-?: T[P];
@@ -14,7 +17,7 @@ export type DropFirst<T extends any[]> = T extends [any, ...infer Rest] ? Rest :
 
 export type QUEUE_TYPES = (typeof SUPPORTED_QUEUES)[keyof typeof SUPPORTED_QUEUES];
 
-export interface IKafkaConfig {
+export interface IKafkaServiceConfig {
 	kafkaConfig: Required<KafkaConfig, "clientId">;
 	adminConfig?: AdminConfig;
 	producerConfig?: ProducerConfig;
@@ -53,9 +56,32 @@ export type IKafkaMessageProcessor = (
 	...args: any[]
 ) => unknown;
 
+export type IASBServiceConfig = (
+	| {
+			connectionString: string;
+	  }
+	| {
+			namespace: string;
+			credential: TokenCredential | NamedKeyCredential | SASCredential;
+	  }
+) & { options?: ServiceBusClientOptions; logger?: Logger; apm?: Agent };
+
+export interface IASBQueueMessage {
+	messageId?: string;
+	subject?: string;
+	body: object;
+	scheduleTimeUtc?: Date;
+	sourceRequestId?: string;
+	traceparent?: string;
+}
+
 export type QueueServiceConfig<T extends QUEUE_TYPES> = T extends typeof SUPPORTED_QUEUES.KAFKA
-	? IKafkaConfig
-	: never;
+	? IKafkaServiceConfig
+	: T extends typeof SUPPORTED_QUEUES.ASB
+		? IASBServiceConfig
+		: never;
 export type IQueueServiceInstance<T extends QUEUE_TYPES> = T extends typeof SUPPORTED_QUEUES.KAFKA
 	? KafkaService
-	: never;
+	: T extends typeof SUPPORTED_QUEUES.ASB
+		? ASBService
+		: never;

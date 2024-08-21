@@ -23,3 +23,15 @@ export const kafkaQueueConfig: QueueConfig<typeof SUPPORTED_QUEUES.KAFKA> = {
 		},
 	},
 };
+
+export const asbQueueConfig: QueueConfig<typeof SUPPORTED_QUEUES.ASB> = {
+	type: SUPPORTED_QUEUES.ASB,
+	providerName: constants.QUEUE_SERVICES.ASB_SERVICE,
+	config: {
+		connectionString: process.env.ASB_CONNECTION_STRING!,
+		logger: new Logger(constants.QUEUE_SERVICES.ASB_SERVICE),
+		apm,
+	},
+};
+
+console.log("ASBBB", process.env.ASB_CONNECTION_STRING);

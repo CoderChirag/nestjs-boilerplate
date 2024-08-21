@@ -44,4 +44,7 @@ export class ProcessorAppEnvSchema {
 
 	@IsNumber()
 	LIVENESS_WRITE_INTERVAL: number;
+
+	@IsString()
+	ASB_CONNECTION_STRING: string;
 }

@@ -16,6 +16,9 @@ export const constants = {
 			TODOS_SQL: `todos-v1-${process.env.NODE_ENV}`,
 			TODOS_MONGO: `todos-v2-${process.env.NODE_ENV}`,
 		},
+		PUBLISH_ASB_QUEUES: {
+			TODOS_SQL: `todos-v1-${process.env.NODE_ENV}`,
+		},
 		CONSUMER_GROUPS: {
 			TODOS_SQL: {
 				GROUP_ID: `todos-v1-processor-${process.env.NODE_ENV}`,
@@ -40,6 +43,7 @@ export const constants = {
 	},
 	QUEUE_SERVICES: {
 		KAFKA_SERVICE: "KAFKA_SERVICE",
+		ASB_SERVICE: "ASB_SERVICE",
 	},
 	CONFIGURATION_SERVICE: "ConfigurationService",
 };

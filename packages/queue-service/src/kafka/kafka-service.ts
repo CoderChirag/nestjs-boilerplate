@@ -1,14 +1,13 @@
 import { Admin, ITopicConfig, Kafka } from "kafkajs";
-import { IKafkaConfig, ISchemaRegistryOptions, KafkaServiceError } from "..";
+import { IKafkaServiceConfig, ISchemaRegistryOptions, KafkaServiceError } from "..";
 import { Agent } from "elastic-apm-node";
 import { KafkaProducerService } from "./kafka-producer-service";
 import { KafkaConsumerService } from "./kafka-consumer-service";
-import { IQueueService } from "../interfaces";
 import { Logger } from "@repo/utility-types";
 import { COMPATIBILITY, SchemaRegistry, readAVSCAsync } from "@kafkajs/confluent-schema-registry";
 import { AvroConfluentSchema, RawAvroSchema } from "@kafkajs/confluent-schema-registry/dist/@types";
 
-export class KafkaService implements IQueueService {
+export class KafkaService {
 	private _client: Kafka;
 	private _admin: Admin;
 	private _schemaRegistry: SchemaRegistry;
@@ -18,7 +17,7 @@ export class KafkaService implements IQueueService {
 	private logger: Logger;
 	private apm?: Agent;
 
-	constructor(config: IKafkaConfig) {
+	constructor(config: IKafkaServiceConfig) {
 		const { kafkaConfig, apm, logger, adminConfig, producerConfig, schemaRegistryConfig } = config;
 		this._client = new Kafka(kafkaConfig);
 		this.logger = logger ?? console;
