@@ -6,9 +6,15 @@ import { Logger } from "@repo/utility-types";
 import { SchemaRegistryAPIClientArgs } from "@kafkajs/confluent-schema-registry/dist/api";
 import { SchemaRegistryAPIClientOptions } from "@kafkajs/confluent-schema-registry/dist/@types";
 import { COMPATIBILITY } from "@kafkajs/confluent-schema-registry";
-import { ServiceBusClientOptions, TokenCredential } from "@azure/service-bus";
+import {
+	ServiceBusClientOptions,
+	ServiceBusReceivedMessage,
+	ServiceBusReceiverOptions,
+	TokenCredential,
+} from "@azure/service-bus";
 import { NamedKeyCredential, SASCredential } from "@azure/core-auth";
 import { ASBService } from "./asb";
+import { ASBConsumerProcessorError } from "./exceptions/asb";
 
 export type Required<T extends Record<string, any>, K extends keyof T> = T & {
 	[P in K]-?: T[P];
@@ -74,6 +80,24 @@ export interface IASBQueueMessage {
 	sourceRequestId?: string;
 	traceparent?: string;
 }
+
+export type IASBConsumerConfig =
+	| { queueName: string; options?: ServiceBusReceiverOptions }
+	| { topicName: string; subscriptionName: string; options?: ServiceBusReceiverOptions };
+
+export type IASBMessageProcessorMessageArg<T> = Omit<ServiceBusReceivedMessage, "body"> & {
+	body: T;
+};
+
+export type InferASBMessageProcessorMessageArgValue<T extends IASBMessageProcessorMessageArg<any>> =
+	T extends IASBMessageProcessorMessageArg<infer K> ? K : never;
+
+export type IASBMessageProcessor = (
+	message: IASBMessageProcessorMessageArg<any>,
+	...args: any[]
+) => void | Promise<void>;
+
+export type IASBErrorProcessor = (err: ASBConsumerProcessorError) => void | Promise<void>;
 
 export type QueueServiceConfig<T extends QUEUE_TYPES> = T extends typeof SUPPORTED_QUEUES.KAFKA
 	? IKafkaServiceConfig

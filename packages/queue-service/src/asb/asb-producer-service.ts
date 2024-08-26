@@ -18,7 +18,7 @@ export class ASBProducerService {
 
 	async publish(queueName: string, message: IASBQueueMessage) {
 		this._apm?.currentTransaction?.setLabel("asb_producer_queue", queueName);
-		const span = this._apm?.startSpan("ASB", {
+		const span = this._apm?.startSpan(`ASB SEND to ${queueName}`, {
 			exitSpan: true,
 			...(this._apm?.currentTraceparent ? { childOf: this._apm?.currentTraceparent } : {}),
 		});

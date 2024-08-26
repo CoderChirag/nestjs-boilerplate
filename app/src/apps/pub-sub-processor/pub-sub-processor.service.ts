@@ -8,7 +8,7 @@ import {
 	OnApplicationBootstrap,
 	OnApplicationShutdown,
 } from "@nestjs/common";
-import { KafkaService } from "queue-service";
+import { ASBService, KafkaService } from "queue-service";
 import { constants } from "src/constants";
 import { DBServicesProvider } from "src/services/db-services/db-services.provider";
 import { sigUsrAndSigtermTimeDiffLog } from "src/utility/utility-functions.util";
@@ -23,6 +23,7 @@ export class PubSubProcessorService implements OnApplicationBootstrap, OnApplica
 
 	constructor(
 		@Inject(constants.QUEUE_SERVICES.KAFKA_SERVICE) private readonly kafkaService: KafkaService,
+		@Inject(constants.QUEUE_SERVICES.ASB_SERVICE) private readonly asbService: ASBService,
 		@Inject(constants.CONFIGURATION_SERVICE) private readonly configService: ProcessorAppEnvSchema,
 		private readonly dbServicesProvider: DBServicesProvider,
 		private readonly todoProcessorService: TodosProcessorService,
@@ -38,6 +39,7 @@ export class PubSubProcessorService implements OnApplicationBootstrap, OnApplica
 			this.usrSigTime = Date.now();
 			this.logger.log("SIGUSR1 signal received.");
 			await this.kafkaService.disconnect();
+			await this.asbService.disconnect();
 			this.logger.log(`${this.configService.APP_NAME}: All consumers for this pod are paused`);
 		});
 
@@ -62,6 +64,22 @@ export class PubSubProcessorService implements OnApplicationBootstrap, OnApplica
 				schemaEnabled: true,
 			},
 			this.todoProcessorService.processTodos,
+			this.todoProcessorService.logger,
+		);
+
+		await this.asbService.consumer.subscribe(
+			{ queueName: constants.INFRA.ASB_QUEUES.TODOS_SQL },
+			this.todoProcessorService.processTodosFromASB,
+			this.asbService.consumer.defaultErrorProcessor,
+			{},
+			this.todoProcessorService.logger,
+		);
+
+		await this.asbService.consumer.subscribe(
+			{ queueName: constants.INFRA.ASB_QUEUES.TODOS_MONGO },
+			this.todoProcessorService.processTodosFromASB,
+			this.asbService.consumer.defaultErrorProcessor,
+			{},
 			this.todoProcessorService.logger,
 		);
 

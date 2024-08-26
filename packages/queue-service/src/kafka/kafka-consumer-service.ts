@@ -52,7 +52,7 @@ export class KafkaConsumerService {
 
 	async disconnect() {
 		try {
-			await Promise.all(this._consumers.map((consumer) => consumer.disconnect()));
+			await Promise.all(this._consumers.map(async (consumer) => await consumer.disconnect()));
 			this.logger.log("[KafkaConsumer] Kafka Consumers Disconnected!!");
 		} catch (e) {
 			const err = new KafkaConsumerServiceError("Error disconnecting from Kafka Consumers", e);
@@ -71,19 +71,8 @@ export class KafkaConsumerService {
 		const { topics, fromBeginning, dlqRequired, schemaEnabled } = subscription;
 		const runConfig: ConsumerRunConfig = {
 			eachMessage: async ({ message, topic, partition, heartbeat }) => {
-				const transaction = this.apm?.startTransaction(`Kafka Consumer - ${topic}`, {
-					childOf: message.headers?.traceparent?.toString(),
-				});
-				transaction?.setType("kafka");
-				transaction?.setLabel("kafka_consumer_topic", topic);
-				const span = transaction?.startSpan(
-					`Processing Kafka Message - ${topic}`,
-					"messaging",
-					"kafka",
-					"receive",
-					{ exitSpan: true },
-				);
-				span?.setServiceTarget("kafka", topic);
+				const { transaction, span } = this.setupTransaction(topic, message);
+
 				try {
 					const messageHeaders = this.parseMessageHeaders(message.headers || {});
 					this.logger.log(
@@ -103,7 +92,10 @@ export class KafkaConsumerService {
 					const decodedMsg = await this.decodeMsg<
 						InferKafkaMessageProcessorMessageArgValue<Parameters<T>[0]>
 					>(topic, message, schemaEnabled);
+					span?.setLabel("kafka_consumer_key", decodedMsg.key);
+					span?.setLabel("kafka_consumer_message", JSON.stringify(decodedMsg.value));
 					await this.runProcessor<T>(topic, processor, decodedMsg, ...args);
+					span?.setOutcome("success");
 				} catch (e) {
 					let err = e;
 					if (!(err instanceof KafkaConsumerRunError)) {
@@ -117,6 +109,7 @@ export class KafkaConsumerService {
 					}
 
 					if (dlqRequired) await this.publishToDlq(topic, message, err as KafkaConsumerRunError);
+					span?.setOutcome("failure");
 				} finally {
 					span?.end();
 					transaction?.end();
@@ -125,6 +118,23 @@ export class KafkaConsumerService {
 		};
 
 		await this.consume(consumerConfig, { topics, fromBeginning }, runConfig);
+	}
+
+	private setupTransaction(topic: string, message: KafkaMessage) {
+		const transaction = this.apm?.startTransaction(`Kafka Consumer - ${topic}`, "messaging", {
+			childOf: message.headers?.traceparent?.toString(),
+		});
+		transaction?.setLabel("kafka_consumer_topic", topic);
+		const span = transaction?.startSpan(
+			`Processing Kafka Message - ${topic}`,
+			"messaging",
+			"kafka",
+			"receive",
+			{ exitSpan: true },
+		);
+		span?.setServiceTarget("kafka", topic);
+
+		return { transaction, span };
 	}
 
 	private parseMessageHeaders(headers: IHeaders) {

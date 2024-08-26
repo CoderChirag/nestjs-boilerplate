@@ -32,7 +32,7 @@ export class TodosService {
 			},
 			true,
 		);
-		await this.asbProducerService.publish(constants.INFRA.PUBLISH_ASB_QUEUES.TODOS_SQL, {
+		await this.asbProducerService.publish(constants.INFRA.ASB_QUEUES.TODOS_SQL, {
 			subject: "todos-v1",
 			body: todos[0],
 		});

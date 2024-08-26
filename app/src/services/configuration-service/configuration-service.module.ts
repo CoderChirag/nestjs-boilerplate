@@ -5,10 +5,10 @@ import { ConfigurationService } from "./configuration-service.service";
 
 @Module({})
 export class ConfigurationServiceModule {
-	static forRoot<T extends Object>(
+	static forRoot<T extends object>(
 		schema: ClassConstructor<T>,
-		env: Object,
-		transformer: (env: Object) => Object,
+		env: object,
+		transformer: (env: object) => object,
 	): DynamicModule {
 		return {
 			module: ConfigurationServiceModule,

@@ -2,9 +2,9 @@ import apm from "elastic-apm-node";
 import { ClassConstructor, plainToClass } from "class-transformer";
 import { validate } from "class-validator";
 
-export class ConfigurationService<T extends Object> {
+export class ConfigurationService<T extends object> {
 	private _config: T;
-	constructor(schema: ClassConstructor<T>, env: Object, transformer: (env: Object) => Object) {
+	constructor(schema: ClassConstructor<T>, env: object, transformer: (env: object) => object) {
 		const transformedEnv = transformer(env);
 		this._config = plainToClass(schema, transformedEnv);
 	}

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { IKafkaMessageProcessorMessageArg } from "queue-service";
+import { IASBMessageProcessorMessageArg, IKafkaMessageProcessorMessageArg } from "queue-service";
 import { TodoEntity } from "src/utility/entities/todos/todo.entity";
 
 @Injectable()
@@ -18,5 +18,13 @@ export class TodosProcessorService {
 			message.value.priority,
 			message.value.status,
 		);
+	}
+
+	async processTodosFromASB(message: IASBMessageProcessorMessageArg<TodoEntity>, logger: Logger) {
+		const { body, applicationProperties } = message;
+		logger.log(`Message User Properties: ${JSON.stringify(applicationProperties, null, 2)}`);
+		logger.log(`Message Body: ${JSON.stringify(body, null, 2)}`);
+		logger.log(body._id, body.title, body.description, body.priority, body.status);
+		logger.log(message);
 	}
 }

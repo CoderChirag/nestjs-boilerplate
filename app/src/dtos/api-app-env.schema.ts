@@ -1,6 +1,6 @@
 import { IsBoolean, IsEnum, IsPort, IsString } from "class-validator";
 
-export function apiAppEnvTransformer(env: Object) {
+export function apiAppEnvTransformer(env: object) {
 	const transformedEnv = { ...env };
 	if (env["APM_ACTIVE"]) transformedEnv["APM_ACTIVE"] = Boolean(env["APM_ACTIVE"]);
 	return transformedEnv;

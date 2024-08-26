@@ -1,6 +1,6 @@
 import { IsBoolean, IsEnum, IsNumber, IsPort, IsString } from "class-validator";
 
-export function processorAppEnvTransformer(env: Object) {
+export function processorAppEnvTransformer(env: object) {
 	const transformedEnv = { ...env };
 	if (env["APM_ACTIVE"]) transformedEnv["APM_ACTIVE"] = Boolean(env["APM_ACTIVE"]);
 	if (env["LIVENESS_WRITE_INTERVAL"])

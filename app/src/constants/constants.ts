@@ -16,8 +16,9 @@ export const constants = {
 			TODOS_SQL: `todos-v1-${process.env.NODE_ENV}`,
 			TODOS_MONGO: `todos-v2-${process.env.NODE_ENV}`,
 		},
-		PUBLISH_ASB_QUEUES: {
+		ASB_QUEUES: {
 			TODOS_SQL: `todos-v1-${process.env.NODE_ENV}`,
+			TODOS_MONGO: `todos-v2-${process.env.NODE_ENV}`,
 		},
 		CONSUMER_GROUPS: {
 			TODOS_SQL: {

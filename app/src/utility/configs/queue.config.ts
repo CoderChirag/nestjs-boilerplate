@@ -33,5 +33,3 @@ export const asbQueueConfig: QueueConfig<typeof SUPPORTED_QUEUES.ASB> = {
 		apm,
 	},
 };
-
-console.log("ASBBB", process.env.ASB_CONNECTION_STRING);

@@ -7,7 +7,7 @@ import { AsyncExceptionFilter } from "src/filters/async-exception.filter";
 import { DBServicesModule } from "src/services/db-services/db-services.module";
 import { dbConfigs } from "src/utility/configs/db.config";
 import { loggerConfigurations } from "src/utility/configs/logger-configuration";
-import { kafkaQueueConfig } from "src/utility/configs/queue.config";
+import { asbQueueConfig, kafkaQueueConfig } from "src/utility/configs/queue.config";
 import { PubSubProcessorService } from "./pub-sub-processor.service";
 import { ScheduleModule } from "@nestjs/schedule";
 import { TodosProcessorModule } from "src/modules/todos-processor/todos-processor.module";
@@ -28,6 +28,7 @@ import {
 		ScheduleModule.forRoot(),
 		DBModule.forRoot(dbConfigs),
 		QueueModule.forRoot(kafkaQueueConfig),
+		QueueModule.forRoot(asbQueueConfig),
 		DBServicesModule,
 		TodosProcessorModule,
 	],
