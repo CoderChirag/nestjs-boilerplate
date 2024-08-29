@@ -1,0 +1,36 @@
+{
+	"name": "nestjs-caching-service",
+	"version": "0.0.1",
+	"description": "Boilerpate for nestjs project",
+	"author": "Chirag Jain",
+	"private": true,
+	"license": "UNLICENSED",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"require": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsup --dts --minify --clean",
+		"dev": "tsup  --dts --sourcemap --clean",
+		"lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
+	},
+	"dependencies": {
+		"@nestjs/common": "^10.0.0",
+		"caching-service": "*"
+	},
+	"devDependencies": {
+		"@types/node": "^20.3.1",
+		"@typescript-eslint/eslint-plugin": "^6.0.0",
+		"@typescript-eslint/parser": "^6.0.0",
+		"concurrently": "^8.2.2",
+		"eslint": "^8.42.0",
+		"eslint-config-prettier": "^9.0.0",
+		"eslint-plugin-prettier": "^5.0.0",
+		"prettier": "^3.0.0",
+		"tsup": "^8.2.4",
+		"typescript": "^5.1.3"
+	}
+}
