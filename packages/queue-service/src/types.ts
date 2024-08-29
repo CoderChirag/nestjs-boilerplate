@@ -81,6 +81,9 @@ export interface IASBQueueMessage {
 	traceparent?: string;
 }
 
+export type IASBQueuePublishReturnType<T extends IASBQueueMessage> =
+	"scheduleTimeUtc" extends keyof T ? Long.Long : void;
+
 export type IASBConsumerConfig =
 	| { queueName: string; options?: ServiceBusReceiverOptions }
 	| { topicName: string; subscriptionName: string; options?: ServiceBusReceiverOptions };

@@ -185,4 +185,115 @@ export class ASBConsumerService {
 		this._logger.error(err.message);
 		return await errorProcessor(err);
 	}
+
+	async deleteMessage<T>(queueName: string, message: IASBMessageProcessorMessageArg<T>) {
+		const span = this._apm?.startSpan(`ASB Delete Message from Queue(${queueName})`, {
+			exitSpan: true,
+			...(this._apm?.currentTraceparent ? { childOf: this._apm?.currentTraceparent } : {}),
+		});
+		span?.setServiceTarget("Message Queue", "ASB");
+		span?.setType("messaging");
+		span?.setLabel("asb_delete_message_queue", queueName);
+		span?.setLabel(
+			"asb_delete_message_headers",
+			JSON.stringify(message.applicationProperties) || "",
+		);
+		span?.setLabel("asb_delete_message_id", message?.messageId?.toString() || "");
+		span?.setLabel("asb_delete_message_subject", message.subject || "");
+		span?.setLabel("asb_delete_message_body", JSON.stringify(message.body) || "");
+
+		const receiver = this._client.createReceiver(queueName);
+		try {
+			await receiver.completeMessage(message);
+			this._logger.log(`[ASBConsumerService] Message Deleted from Queue(${queueName})`);
+			span?.setOutcome("success");
+		} catch (e) {
+			const err = new ASBConsumerServiceError(
+				`Error deleting message from ASB Queue(${queueName})`,
+				e,
+			);
+			this._logger.error(err.message);
+			this._apm?.captureError(err);
+			span?.setOutcome("failure");
+			throw err;
+		} finally {
+			try {
+				await receiver.close();
+			} catch (e) {}
+			span?.end();
+		}
+	}
+
+	async abandonMessage<T>(queueName: string, message: IASBMessageProcessorMessageArg<T>) {
+		const span = this._apm?.startSpan(`ASB Delete Message from Queue(${queueName})`, {
+			exitSpan: true,
+			...(this._apm?.currentTraceparent ? { childOf: this._apm?.currentTraceparent } : {}),
+		});
+		span?.setServiceTarget("Message Queue", "ASB");
+		span?.setType("messaging");
+		span?.setLabel("asb_abandon_message_queue", queueName);
+		span?.setLabel(
+			"asb_abandon_message_headers",
+			JSON.stringify(message.applicationProperties) || "",
+		);
+		span?.setLabel("asb_abandon_message_id", message?.messageId?.toString() || "");
+		span?.setLabel("asb_abandon_message_subject", message.subject || "");
+		span?.setLabel("asb_abandon_message_body", JSON.stringify(message.body) || "");
+
+		const receiver = this._client.createReceiver(queueName);
+		try {
+			await receiver.abandonMessage(message);
+			this._logger.log(`[ASBConsumerService] Message Abandoned from Queue(${queueName})`);
+			span?.setOutcome("success");
+		} catch (e) {
+			const err = new ASBConsumerServiceError(
+				`Error abandoning message from ASB Queue(${queueName})`,
+				e,
+			);
+			this._logger.error(err.message);
+			this._apm?.captureError(err);
+			span?.setOutcome("failure");
+			throw err;
+		} finally {
+			try {
+				await receiver.close();
+			} catch (e) {}
+			span?.end();
+		}
+	}
+
+	async deadLetterMessage<T>(queueName: string, message: IASBMessageProcessorMessageArg<T>) {
+		const span = this._apm?.startSpan(`ASB Move Message to DLQ Queue(${queueName})`, {
+			exitSpan: true,
+			...(this._apm?.currentTraceparent ? { childOf: this._apm?.currentTraceparent } : {}),
+		});
+		span?.setServiceTarget("Message Queue", "ASB");
+		span?.setType("messaging");
+		span?.setLabel("asb_dlq_message_queue", queueName);
+		span?.setLabel("asb_dlq_message_headers", JSON.stringify(message.applicationProperties) || "");
+		span?.setLabel("asb_dlq_message_id", message?.messageId?.toString() || "");
+		span?.setLabel("asb_dlq_message_subject", message.subject || "");
+		span?.setLabel("asb_dlq_message_body", JSON.stringify(message.body) || "");
+
+		const receiver = this._client.createReceiver(queueName);
+		try {
+			await receiver.deadLetterMessage(message);
+			this._logger.log(`[ASBConsumerService] Message Moved to DLQ from Queue(${queueName})`);
+			span?.setOutcome("success");
+		} catch (e) {
+			const err = new ASBConsumerServiceError(
+				`Error moving message to dlq from ASB Queue(${queueName})`,
+				e,
+			);
+			this._logger.error(err.message);
+			this._apm?.captureError(err);
+			span?.setOutcome("failure");
+			throw err;
+		} finally {
+			try {
+				await receiver.close();
+			} catch (e) {}
+			span?.end();
+		}
+	}
 }
