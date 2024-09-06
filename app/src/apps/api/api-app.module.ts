@@ -14,11 +14,14 @@ import { QueueModule } from "nestjs-queue-service";
 import { asbQueueConfig, kafkaQueueConfig } from "src/utility/configs/queue.config";
 import { ConfigurationServiceModule } from "src/services/configuration-service/configuration-service.module";
 import { ApiAppEnvSchema, apiAppEnvTransformer } from "src/dtos/api-app-env.schema";
+import { CachingServiceModule } from "nestjs-caching-service";
+import { redisConfig } from "src/utility/configs/caching-service.config";
 
 @Module({
 	imports: [
 		LoggerModule.forRoot(loggerConfigurations),
 		ConfigurationServiceModule.forRoot(ApiAppEnvSchema, process.env, apiAppEnvTransformer),
+		CachingServiceModule.forRoot(redisConfig),
 		DBModule.forRoot(dbConfigs),
 		QueueModule.forRoot(kafkaQueueConfig),
 		QueueModule.forRoot(asbQueueConfig),

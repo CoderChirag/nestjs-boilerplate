@@ -56,8 +56,8 @@ export class DBService<T extends DB_TYPES, S extends IConfigModelsOrSchemas> {
 				);
 				break;
 			default:
-				const err = new DBServiceError("DB type not supported");
-				(logger as any).error(`DB type not supported: ${type}`);
+				const err = new DBServiceError(`DB type not supported: ${type}`);
+				((logger || console) as any).error(err.message);
 				(apm as Agent)?.captureError(err);
 				throw err;
 		}

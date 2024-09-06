@@ -1,5 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { todo } from "node:test";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ASBProducerService, ASBService, KafkaProducerService, KafkaService } from "queue-service";
 import { constants } from "src/constants";
 import { ITodoService } from "src/services/db-services/todo/todo.interface";
@@ -7,12 +6,14 @@ import { TodoRepository } from "src/services/db-services/todo/todo.repository";
 
 @Injectable()
 export class TodosServiceV2 {
+	private logger = new Logger("TodosService");
 	private dbService: ITodoService;
 	private kafkaProducerService: KafkaProducerService;
 	private asbProducerService: ASBProducerService;
 
 	constructor(
 		private readonly todoRepository: TodoRepository,
+		@Inject("REDIS_SERVICE") private readonly redis: any,
 		@Inject(constants.QUEUE_SERVICES.KAFKA_SERVICE) _kafkaService: KafkaService,
 		@Inject(constants.QUEUE_SERVICES.ASB_SERVICE) _asbService: ASBService,
 	) {
@@ -23,6 +24,9 @@ export class TodosServiceV2 {
 
 	async getAll() {
 		const todos = await this.dbService.findAll();
+		const res = await this.redis.set("todos-v2", JSON.stringify(todos[0]));
+		this.logger.log(`Todos-v2 Cached: ${res}`);
+		this.logger.log(await this.redis.get("todos-v2"));
 		await this.kafkaProducerService.publish(
 			constants.INFRA.PUBLISH_TOPICS.TODOS_MONGO,
 			{

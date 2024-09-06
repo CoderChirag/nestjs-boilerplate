@@ -30,6 +30,11 @@ export const constants = {
 				TOPICS: [`todos-v2-${process.env.NODE_ENV}`],
 			},
 		},
+		CACHING_SERVICES: {
+			REDIS: {
+				PROVIDER_NAME: "REDIS_SERVICE",
+			},
+		},
 	},
 	SWAGGER: {
 		TITLE: "Nestjs Boilerplate",

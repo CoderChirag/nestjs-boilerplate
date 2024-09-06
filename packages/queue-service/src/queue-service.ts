@@ -1,4 +1,4 @@
-import { Agent, logger } from "elastic-apm-node";
+import { Agent } from "elastic-apm-node";
 import { QueueServiceError } from ".";
 import { SUPPORTED_QUEUES } from "./constants";
 import { KafkaService } from "./kafka/kafka-service";
@@ -23,8 +23,8 @@ export class QueueService<T extends QUEUE_TYPES> {
 				(this._instance as any) = new ASBService(config as IASBServiceConfig);
 				break;
 			default:
-				const err = new QueueServiceError("Queue type not supported");
-				(logger as any).error(`Queue type not supported: ${type}`);
+				const err = new QueueServiceError(`Queue type not supported: ${type}`);
+				((config?.logger || console) as any).error(err.message);
 				(config.apm as Agent)?.captureError(err);
 				throw err;
 		}
