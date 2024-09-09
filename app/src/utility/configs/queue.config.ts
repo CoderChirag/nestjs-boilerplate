@@ -6,7 +6,7 @@ import { constants } from "src/constants";
 
 export const kafkaQueueConfig: QueueConfig<typeof SUPPORTED_QUEUES.KAFKA> = {
 	type: SUPPORTED_QUEUES.KAFKA,
-	providerName: constants.QUEUE_SERVICES.KAFKA_SERVICE,
+	providerName: constants.QUEUE_SERVICES.KAFKA_SERVICE.PROVIDER_NAME,
 	config: {
 		kafkaConfig: {
 			clientId: process.env.KAFKA_CLIENT_ID!,
@@ -15,7 +15,7 @@ export const kafkaQueueConfig: QueueConfig<typeof SUPPORTED_QUEUES.KAFKA> = {
 		schemaRegistryConfig: {
 			args: { host: process.env.SCHEMA_REGISTRY_HOST! },
 		},
-		logger: new Logger(constants.QUEUE_SERVICES.KAFKA_SERVICE),
+		logger: new Logger(constants.QUEUE_SERVICES.KAFKA_SERVICE.PROVIDER_NAME),
 		apm,
 		adminConfig: {},
 		producerConfig: {
@@ -36,10 +36,10 @@ export const kafkaQueueConfig: QueueConfig<typeof SUPPORTED_QUEUES.KAFKA> = {
 
 export const asbQueueConfig: QueueConfig<typeof SUPPORTED_QUEUES.ASB> = {
 	type: SUPPORTED_QUEUES.ASB,
-	providerName: constants.QUEUE_SERVICES.ASB_SERVICE,
+	providerName: constants.QUEUE_SERVICES.ASB_SERVICE.PROVIDER_NAME,
 	config: {
 		connectionString: process.env.ASB_CONNECTION_STRING!,
-		logger: new Logger(constants.QUEUE_SERVICES.ASB_SERVICE),
+		logger: new Logger(constants.QUEUE_SERVICES.ASB_SERVICE.PROVIDER_NAME),
 		apm,
 	},
 };

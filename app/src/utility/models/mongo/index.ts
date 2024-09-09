@@ -4,4 +4,4 @@ export const SCHEMAS = {
 	todos: {
 		todo: TodoSchema,
 	},
-};
+} as const;

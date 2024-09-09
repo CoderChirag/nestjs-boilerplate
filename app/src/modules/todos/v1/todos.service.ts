@@ -14,9 +14,10 @@ export class TodosService {
 
 	constructor(
 		_todoRepository: TodoRepository,
-		@Inject("REDIS_SERVICE") private readonly redis: RedisService,
-		@Inject(constants.QUEUE_SERVICES.KAFKA_SERVICE) _kafkaService: KafkaService,
-		@Inject(constants.QUEUE_SERVICES.ASB_SERVICE) _asbService: ASBService,
+		@Inject(constants.CACHING_SERVICES.REDIS.PROVIDER_NAME)
+		private readonly redis: RedisService,
+		@Inject(constants.QUEUE_SERVICES.KAFKA_SERVICE.PROVIDER_NAME) _kafkaService: KafkaService,
+		@Inject(constants.QUEUE_SERVICES.ASB_SERVICE.PROVIDER_NAME) _asbService: ASBService,
 	) {
 		this.dbService = _todoRepository.getSqlService();
 		this.kafkaProducerService = _kafkaService.producer;

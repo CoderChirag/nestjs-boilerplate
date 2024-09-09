@@ -30,11 +30,6 @@ export const constants = {
 				TOPICS: [`todos-v2-${process.env.NODE_ENV}`],
 			},
 		},
-		CACHING_SERVICES: {
-			REDIS: {
-				PROVIDER_NAME: "REDIS_SERVICE",
-			},
-		},
 	},
 	SWAGGER: {
 		TITLE: "Nestjs Boilerplate",
@@ -44,12 +39,17 @@ export const constants = {
 		JSON_DOCUMENTATION_PATH: "/api/docs-json",
 	},
 	DB_SERVICES: {
-		MONGO_DB_SERVICE: "MONGO_DB_SERVICE",
-		SQL_DB_SERVICE: "SQL_DB_SERVICE",
+		MONGO_DB_SERVICE: { PROVIDER_NAME: "MONGO_DB_SERVICE" },
+		SQL_DB_SERVICE: { PROVIDER_NAME: "SQL_DB_SERVICE" },
 	},
 	QUEUE_SERVICES: {
-		KAFKA_SERVICE: "KAFKA_SERVICE",
-		ASB_SERVICE: "ASB_SERVICE",
+		KAFKA_SERVICE: { PROVIDER_NAME: "KAFKA_SERVICE" },
+		ASB_SERVICE: { PROVIDER_NAME: "ASB_SERVICE" },
+	},
+	CACHING_SERVICES: {
+		REDIS: {
+			PROVIDER_NAME: "REDIS_SERVICE",
+		},
 	},
 	CONFIGURATION_SERVICE: "ConfigurationService",
-};
+} as const;

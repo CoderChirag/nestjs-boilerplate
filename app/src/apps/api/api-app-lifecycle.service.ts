@@ -19,7 +19,8 @@ export class ApiAppLifecycleService implements OnApplicationBootstrap, OnApplica
 
 	constructor(
 		private readonly eventEmitter: EventEmitter2,
-		@Inject(constants.QUEUE_SERVICES.KAFKA_SERVICE) private readonly kafkaService: KafkaService,
+		@Inject(constants.QUEUE_SERVICES.KAFKA_SERVICE.PROVIDER_NAME)
+		private readonly kafkaService: KafkaService,
 	) {}
 
 	async onApplicationBootstrap() {

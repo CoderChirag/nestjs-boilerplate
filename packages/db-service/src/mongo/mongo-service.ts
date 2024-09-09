@@ -66,10 +66,10 @@ export class MongoService<S extends Record<string, Schema<any>>> implements IDBS
 	private async setupModels() {
 		try {
 			await this.hooks(this.schemas);
-			for (const [modelName, model] of Object.entries(this.schemas)) {
+			for (const [modelName, schema] of Object.entries(this.schemas)) {
 				(this.models[modelName] as any) =
 					this.mongoConnectionRef.model[modelName] ??
-					this.mongoConnectionRef.model(modelName, model);
+					this.mongoConnectionRef.model(modelName, schema);
 				this[modelName] = this.models[modelName];
 			}
 		} catch (e) {

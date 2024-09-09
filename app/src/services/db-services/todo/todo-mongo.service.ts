@@ -8,7 +8,7 @@ import { TodoEntity } from "src/utility/entities/todos/todo.entity";
 @Injectable()
 export class TodoMongoService implements ITodoService {
 	constructor(
-		@Inject(constants.DB_SERVICES.MONGO_DB_SERVICE)
+		@Inject(constants.DB_SERVICES.MONGO_DB_SERVICE.PROVIDER_NAME)
 		private readonly mongoService: IMongoService<typeof SCHEMAS.todos>,
 	) {}
 

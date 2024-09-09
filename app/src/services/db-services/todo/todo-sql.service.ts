@@ -7,7 +7,7 @@ import { ITodoService } from "./todo.interface";
 @Injectable()
 export class TodoSqlService implements ITodoService {
 	constructor(
-		@Inject(constants.DB_SERVICES.SQL_DB_SERVICE)
+		@Inject(constants.DB_SERVICES.SQL_DB_SERVICE.PROVIDER_NAME)
 		private readonly sqlService: ISqlService<typeof MODELS.todos>,
 	) {}
 

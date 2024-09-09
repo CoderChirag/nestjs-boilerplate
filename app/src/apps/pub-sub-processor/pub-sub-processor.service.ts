@@ -22,8 +22,10 @@ export class PubSubProcessorService implements OnApplicationBootstrap, OnApplica
 	private usrSigTime: number;
 
 	constructor(
-		@Inject(constants.QUEUE_SERVICES.KAFKA_SERVICE) private readonly kafkaService: KafkaService,
-		@Inject(constants.QUEUE_SERVICES.ASB_SERVICE) private readonly asbService: ASBService,
+		@Inject(constants.QUEUE_SERVICES.KAFKA_SERVICE.PROVIDER_NAME)
+		private readonly kafkaService: KafkaService,
+		@Inject(constants.QUEUE_SERVICES.ASB_SERVICE.PROVIDER_NAME)
+		private readonly asbService: ASBService,
 		@Inject(constants.CONFIGURATION_SERVICE) private readonly configService: ProcessorAppEnvSchema,
 		private readonly dbServicesProvider: DBServicesProvider,
 		private readonly todoProcessorService: TodosProcessorService,
