@@ -47,4 +47,7 @@ export class ProcessorAppEnvSchema {
 
 	@IsString()
 	ASB_CONNECTION_STRING: string;
+
+	@IsString()
+	REDIS_URL: string;
 }

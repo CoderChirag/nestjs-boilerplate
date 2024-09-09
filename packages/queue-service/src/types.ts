@@ -15,6 +15,7 @@ import {
 import { NamedKeyCredential, SASCredential } from "@azure/core-auth";
 import { ASBService } from "./asb";
 import { ASBConsumerProcessorError } from "./exceptions/asb";
+import { ICachingServiceConfig, SUPPORTED_CACHING_PROVIDERS } from "caching-service";
 
 export type Required<T extends Record<string, any>, K extends keyof T> = T & {
 	[P in K]-?: T[P];
@@ -33,6 +34,7 @@ export interface IKafkaServiceConfig {
 	};
 	logger?: Logger;
 	apm?: Agent;
+	redisServiceConfig?: ICachingServiceConfig<typeof SUPPORTED_CACHING_PROVIDERS.REDIS>;
 }
 
 export interface ISchemaRegistryOptions {

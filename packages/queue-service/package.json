@@ -35,6 +35,7 @@
 		"@azure/service-bus": "7.4.0",
 		"@kafkajs/confluent-schema-registry": "^3.3.0",
 		"@repo/utility-types": "*",
+		"caching-service": "*",
 		"elastic-apm-node": "^4.7.1",
 		"kafkajs": "^2.2.4"
 	}

@@ -22,6 +22,7 @@ import {
 } from "..";
 import { Logger } from "@repo/utility-types";
 import { SchemaRegistry } from "@kafkajs/confluent-schema-registry";
+import { ICachingServiceInstance, SUPPORTED_CACHING_PROVIDERS } from "caching-service";
 
 export class KafkaConsumerService {
 	private _client: Kafka;
@@ -31,11 +32,13 @@ export class KafkaConsumerService {
 
 	private logger: Logger;
 	private apm?: Agent;
+	private cachingService?: ICachingServiceInstance<typeof SUPPORTED_CACHING_PROVIDERS.REDIS>;
 
 	constructor(
 		_client: Kafka,
 		_producer: KafkaProducerService,
 		_schemaRegistry: SchemaRegistry,
+		cachingService?: ICachingServiceInstance<typeof SUPPORTED_CACHING_PROVIDERS.REDIS>,
 		logger?: Logger,
 		apm?: Agent,
 	) {
@@ -44,6 +47,7 @@ export class KafkaConsumerService {
 		this._schemaRegistry = _schemaRegistry;
 		this.logger = logger ?? console;
 		this.apm = apm;
+		this.cachingService = cachingService;
 	}
 
 	get consumers() {
@@ -54,6 +58,7 @@ export class KafkaConsumerService {
 		try {
 			await Promise.all(this._consumers.map(async (consumer) => await consumer.disconnect()));
 			this.logger.log("[KafkaConsumer] Kafka Consumers Disconnected!!");
+			await this.cachingService?.disconnect();
 		} catch (e) {
 			const err = new KafkaConsumerServiceError("Error disconnecting from Kafka Consumers", e);
 			this.logger.error(err.message);
@@ -89,12 +94,32 @@ export class KafkaConsumerService {
 					);
 
 					await this.sendHeartbeat(topic, heartbeat);
+
+					try {
+						await this.checkOffset(
+							topic,
+							consumerConfig.groupId,
+							partition,
+							parseInt(message.offset),
+						);
+					} catch (e) {
+						span?.setOutcome("failure");
+						span?.end();
+						transaction?.end();
+						return;
+					}
+
 					const decodedMsg = await this.decodeMsg<
 						InferKafkaMessageProcessorMessageArgValue<Parameters<T>[0]>
 					>(topic, message, schemaEnabled);
+
 					span?.setLabel("kafka_consumer_key", decodedMsg.key);
 					span?.setLabel("kafka_consumer_message", JSON.stringify(decodedMsg.value));
+
 					await this.runProcessor<T>(topic, processor, decodedMsg, ...args);
+
+					await this.publishOffset(topic, consumerConfig.groupId, partition, message.offset);
+
 					span?.setOutcome("success");
 				} catch (e) {
 					let err = e;
@@ -155,6 +180,55 @@ export class KafkaConsumerService {
 			const err = new KafkaConsumerRunError(
 				topic,
 				`Error in sending heartbeat while consuming message from topic - ${topic}`,
+				e,
+			);
+			this.logger.error(err.message);
+			this.apm?.captureError(err);
+		}
+	}
+
+	private async checkOffset(
+		topic: string,
+		consumerGroupId: string,
+		partition: number,
+		messageOffset: number,
+	) {
+		try {
+			const topicOffset = await this.cachingService?.get(
+				`${topic}:${consumerGroupId}:${partition}`,
+			);
+			if (topicOffset) {
+				const offset = parseInt(topicOffset);
+				if (messageOffset <= offset) {
+					throw new Error(
+						`Message offset is less than the last consumed offset for topic(${topic})`,
+					);
+				}
+			}
+		} catch (e) {
+			const err = new KafkaConsumerRunError(
+				topic,
+				`Error checking offset for message from Kafka topic - ${topic}`,
+				e,
+			);
+			this.logger.error(err.message);
+			this.apm?.captureError(err);
+			throw err;
+		}
+	}
+
+	private async publishOffset(
+		topic: string,
+		consumerGroupId: string,
+		partition: number,
+		offset: string,
+	) {
+		try {
+			await this.cachingService?.set(`${topic}:${consumerGroupId}:${partition}`, offset);
+		} catch (e) {
+			const err = new KafkaConsumerRunError(
+				topic,
+				`Error publishing offset for message from Kafka topic - ${topic}`,
 				e,
 			);
 			this.logger.error(err.message);

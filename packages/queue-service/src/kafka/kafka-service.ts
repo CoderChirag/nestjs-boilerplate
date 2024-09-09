@@ -6,6 +6,7 @@ import { KafkaConsumerService } from "./kafka-consumer-service";
 import { Logger } from "@repo/utility-types";
 import { COMPATIBILITY, SchemaRegistry, readAVSCAsync } from "@kafkajs/confluent-schema-registry";
 import { AvroConfluentSchema, RawAvroSchema } from "@kafkajs/confluent-schema-registry/dist/@types";
+import { CachingService, SUPPORTED_CACHING_PROVIDERS } from "caching-service";
 
 export class KafkaService {
 	private _client: Kafka;
@@ -18,7 +19,15 @@ export class KafkaService {
 	private apm?: Agent;
 
 	constructor(config: IKafkaServiceConfig) {
-		const { kafkaConfig, apm, logger, adminConfig, producerConfig, schemaRegistryConfig } = config;
+		const {
+			kafkaConfig,
+			apm,
+			logger,
+			adminConfig,
+			producerConfig,
+			schemaRegistryConfig,
+			redisServiceConfig,
+		} = config;
 		this._client = new Kafka(kafkaConfig);
 		this.logger = logger ?? console;
 		this.apm = apm;
@@ -39,6 +48,9 @@ export class KafkaService {
 			this._client,
 			this._producer,
 			this._schemaRegistry,
+			redisServiceConfig
+				? new CachingService(SUPPORTED_CACHING_PROVIDERS.REDIS, redisServiceConfig).getInstance()
+				: undefined,
 			this.logger,
 			this.apm,
 		);

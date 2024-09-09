@@ -21,6 +21,16 @@ export const kafkaQueueConfig: QueueConfig<typeof SUPPORTED_QUEUES.KAFKA> = {
 		producerConfig: {
 			allowAutoTopicCreation: true,
 		},
+		redisServiceConfig: {
+			redisConfig: {
+				path: process.env.REDIS_URL!,
+				options: {
+					keyPrefix: "kafka-offsets:",
+				},
+			},
+			logger: new Logger("RedisService"),
+			apm,
+		},
 	},
 };
 
