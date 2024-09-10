@@ -9,7 +9,6 @@ module.exports = {
 		"^.+\\.(t|j)s$": "@swc/jest",
 	},
 	// setupFilesAfterEnv: ["<rootDir>/test/unit/setup-tests.ts"],
-	collectCoverage: true,
 	collectCoverageFrom: ["src/**/*.(t|j)s"],
 	coveragePathIgnorePatterns: [
 		".module.ts$",
