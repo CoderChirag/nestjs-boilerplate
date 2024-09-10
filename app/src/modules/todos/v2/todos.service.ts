@@ -13,7 +13,7 @@ export class TodosServiceV2 {
 
 	constructor(
 		private readonly todoRepository: TodoRepository,
-		@Inject(constants.INFRA.CACHING_SERVICES.REDIS) private readonly redis: any,
+		@Inject(constants.CACHING_SERVICES.REDIS.PROVIDER_NAME) private readonly redis: any,
 		@Inject(constants.QUEUE_SERVICES.KAFKA_SERVICE.PROVIDER_NAME) _kafkaService: KafkaService,
 		@Inject(constants.QUEUE_SERVICES.ASB_SERVICE.PROVIDER_NAME) _asbService: ASBService,
 	) {

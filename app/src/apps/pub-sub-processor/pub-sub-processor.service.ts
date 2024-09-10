@@ -50,7 +50,7 @@ export class PubSubProcessorService implements OnApplicationBootstrap, OnApplica
 				groupId: constants.INFRA.CONSUMER_GROUPS.TODOS_SQL.GROUP_ID,
 			},
 			{
-				topics: constants.INFRA.CONSUMER_GROUPS.TODOS_SQL.TOPICS,
+				topics: constants.INFRA.CONSUMER_GROUPS.TODOS_SQL.TOPICS.map((topic) => topic),
 				dlqRequired: true,
 				schemaEnabled: true,
 			},
@@ -61,7 +61,7 @@ export class PubSubProcessorService implements OnApplicationBootstrap, OnApplica
 		await this.kafkaService.consumer.subscribe(
 			{ groupId: constants.INFRA.CONSUMER_GROUPS.TODOS_MONGO.GROUP_ID },
 			{
-				topics: constants.INFRA.CONSUMER_GROUPS.TODOS_MONGO.TOPICS,
+				topics: constants.INFRA.CONSUMER_GROUPS.TODOS_MONGO.TOPICS.map((topic) => topic),
 				dlqRequired: true,
 				schemaEnabled: true,
 			},
