@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
+import { RedisService } from "caching-service";
 import { ASBProducerService, ASBService, KafkaProducerService, KafkaService } from "queue-service";
 import { constants } from "src/constants";
 import { ITodoService } from "src/services/db-services/todo/todo.interface";
@@ -13,7 +14,7 @@ export class TodosServiceV2 {
 
 	constructor(
 		private readonly todoRepository: TodoRepository,
-		@Inject(constants.CACHING_SERVICES.REDIS.PROVIDER_NAME) private readonly redis: any,
+		@Inject(constants.CACHING_SERVICES.REDIS.PROVIDER_NAME) private readonly redis: RedisService,
 		@Inject(constants.QUEUE_SERVICES.KAFKA_SERVICE.PROVIDER_NAME) _kafkaService: KafkaService,
 		@Inject(constants.QUEUE_SERVICES.ASB_SERVICE.PROVIDER_NAME) _asbService: ASBService,
 	) {
