@@ -103,6 +103,7 @@ export class PubSubProcessorService implements OnApplicationBootstrap, OnApplica
 		} catch (err: any) {
 			apm.captureError(err);
 			this.logger.error(`Error creating directory for Liveness File: ${err.message}`);
+			return;
 		}
 
 		try {
