@@ -24,7 +24,7 @@ export const dbConfigs: Record<string, DbConfigOptions<DB_TYPES, IConfigModelsOr
 			username: process.env.SQL_USERNAME!,
 			password: process.env.SQL_PASSWORD!,
 			database: process.env.SQL_DATABASE!,
-			logging: process.env.NODE_ENV === "local" ?? console.log,
+			logging: process.env.NODE_ENV === "local" ? console.log : undefined,
 		},
 		logger: new Logger(constants.DB_SERVICES.SQL_DB_SERVICE.PROVIDER_NAME),
 		apm: apm,
