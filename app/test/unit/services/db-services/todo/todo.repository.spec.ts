@@ -42,14 +42,14 @@ describe("TodoRepository", () => {
 			const result = todoRepository.getSqlService();
 			expect(result).toBe(MockTodoSqlService);
 		});
+	});
 
-		describe("getConnectionStatus", () => {
-			it("should provide db connection status", async () => {
-				MockTodoMongoService.getConnectionStatus.mockResolvedValue(true);
-				MockTodoSqlService.getConnectionStatus.mockResolvedValue(true);
-				const result = await todoRepository.getConnectionStatus();
-				expect(result).toBe(true);
-			});
+	describe("getConnectionStatus", () => {
+		it("should provide db connection status", async () => {
+			MockTodoMongoService.getConnectionStatus.mockResolvedValue(true);
+			MockTodoSqlService.getConnectionStatus.mockResolvedValue(true);
+			const result = await todoRepository.getConnectionStatus();
+			expect(result).toBe(true);
 		});
 	});
 });
