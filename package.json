@@ -13,7 +13,9 @@
     "dev:server": "lerna run start:dev --scope app --stream",
     "dev:consumer": "lerna run start:consumer-dev --scope app --stream",
     "start:dev": "concurrently \"yarn dev:packages\" \"yarn dev:server\"",
-    "start:consumer-dev": "concurrently \"yarn dev:packages\" \"yarn dev:consumer\""
+    "start:consumer-dev": "concurrently \"yarn dev:packages\" \"yarn dev:consumer\"",
+    "test": "lerna run test --stream",
+    "test:cov": "lerna run test:cov --stream"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
