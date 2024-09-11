@@ -1,4 +1,3 @@
-import { Sequelize } from "sequelize";
 import { TodoModel } from "./todos/todo.model";
 
 export const MODELS = {
