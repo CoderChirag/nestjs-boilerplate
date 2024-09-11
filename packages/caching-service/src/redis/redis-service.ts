@@ -35,10 +35,11 @@ export class RedisService {
 
 		this._client.on("connect", () => {
 			this.logger.log(`Connected to redis: ${JSON.stringify(this._client.options)}`);
-			this._client.client("SETNAME", process.env.APP_NAME!, (err, res) => {
-				if (err) this.logger.error(`Failed to async set client name for redis: ${err.message}`);
-				else this.logger.log(`Redis Client name async set to: ${process.env.APP_NAME}`);
-			});
+			if (!this._client.options.connectionName)
+				this._client.client("SETNAME", process.env.APP_NAME!, (err, res) => {
+					if (err) this.logger.error(`Failed to async set client name for redis: ${err.message}`);
+					else this.logger.log(`Redis Client name async set to: ${process.env.APP_NAME}`);
+				});
 		});
 
 		this._client.on("close", () => {
