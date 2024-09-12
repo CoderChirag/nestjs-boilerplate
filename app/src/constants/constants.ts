@@ -39,6 +39,10 @@ export const constants = {
 		JSON_DOCUMENTATION_PATH: "/api/docs-json",
 	},
 	HTTP_RESPONSE_CODES: {
+		FAILED_DEPENDENCY: {
+			CODE: 424,
+			MESSAGE: "Failed Dependency",
+		},
 		INTERNAL_SERVER_ERROR: {
 			CODE: 500,
 			MESSAGE: "Something went wrong",
