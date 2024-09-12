@@ -6,6 +6,7 @@ export interface QueueConfig<T extends QUEUE_TYPES> {
 	type: T;
 	providerName: string;
 	global?: boolean;
+	withTransactionLogger?: boolean;
 	config: QueueServiceConfig<T>;
 }
 
@@ -14,7 +15,14 @@ export class QueueModule {
 	static forRoot<T extends QUEUE_TYPES>(queueConfig: QueueConfig<T>): DynamicModule {
 		return {
 			module: QueueModule,
-			providers: [QueueProvider(queueConfig.providerName, queueConfig.type, queueConfig.config)],
+			providers: [
+				QueueProvider(
+					queueConfig.providerName,
+					queueConfig.type,
+					queueConfig.config,
+					queueConfig.withTransactionLogger,
+				),
+			],
 			exports: [queueConfig.providerName],
 			global: queueConfig.global ?? true,
 		};

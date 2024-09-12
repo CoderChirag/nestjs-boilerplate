@@ -7,6 +7,7 @@ import { constants } from "src/constants";
 export const kafkaQueueConfig: QueueConfig<typeof SUPPORTED_QUEUES.KAFKA> = {
 	type: SUPPORTED_QUEUES.KAFKA,
 	providerName: constants.QUEUE_SERVICES.KAFKA_SERVICE.PROVIDER_NAME,
+	withTransactionLogger: true,
 	config: {
 		kafkaConfig: {
 			clientId: process.env.KAFKA_CLIENT_ID!,
@@ -28,7 +29,7 @@ export const kafkaQueueConfig: QueueConfig<typeof SUPPORTED_QUEUES.KAFKA> = {
 					keyPrefix: "kafka-offsets:",
 				},
 			},
-			logger: new Logger("RedisService"),
+			logger: new Logger(constants.CACHING_SERVICES.REDIS.PROVIDER_NAME),
 			apm,
 		},
 	},
@@ -37,6 +38,7 @@ export const kafkaQueueConfig: QueueConfig<typeof SUPPORTED_QUEUES.KAFKA> = {
 export const asbQueueConfig: QueueConfig<typeof SUPPORTED_QUEUES.ASB> = {
 	type: SUPPORTED_QUEUES.ASB,
 	providerName: constants.QUEUE_SERVICES.ASB_SERVICE.PROVIDER_NAME,
+	withTransactionLogger: true,
 	config: {
 		connectionString: process.env.ASB_CONNECTION_STRING!,
 		logger: new Logger(constants.QUEUE_SERVICES.ASB_SERVICE.PROVIDER_NAME),

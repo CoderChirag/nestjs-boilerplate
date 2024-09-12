@@ -38,6 +38,12 @@ export const constants = {
 		DOCUMENTATION_PATH: "/api/docs",
 		JSON_DOCUMENTATION_PATH: "/api/docs-json",
 	},
+	HTTP_RESPONSE_CODES: {
+		INTERNAL_SERVER_ERROR: {
+			CODE: 500,
+			MESSAGE: "Something went wrong",
+		},
+	},
 	DB_SERVICES: {
 		MONGO_DB_SERVICE: { PROVIDER_NAME: "MONGO_DB_SERVICE" },
 		SQL_DB_SERVICE: { PROVIDER_NAME: "SQL_DB_SERVICE" },

@@ -16,6 +16,7 @@ export class KafkaService {
 	private _consumer: KafkaConsumerService;
 
 	private logger: Logger;
+	private transactionLogger: Logger;
 	private apm?: Agent;
 
 	constructor(config: IKafkaServiceConfig) {
@@ -23,6 +24,7 @@ export class KafkaService {
 			kafkaConfig,
 			apm,
 			logger,
+			transactionLogger,
 			adminConfig,
 			producerConfig,
 			schemaRegistryConfig,
@@ -30,6 +32,7 @@ export class KafkaService {
 		} = config;
 		this._client = new Kafka(kafkaConfig);
 		this.logger = logger ?? console;
+		this.transactionLogger = transactionLogger ?? this.logger;
 		this.apm = apm;
 
 		this._admin = this._client.admin(adminConfig ?? {});
@@ -42,6 +45,7 @@ export class KafkaService {
 			this._schemaRegistry,
 			producerConfig,
 			this.logger,
+			this.transactionLogger,
 			this.apm,
 		);
 		this._consumer = new KafkaConsumerService(
@@ -49,9 +53,13 @@ export class KafkaService {
 			this._producer,
 			this._schemaRegistry,
 			redisServiceConfig
-				? new CachingService(SUPPORTED_CACHING_PROVIDERS.REDIS, redisServiceConfig).getInstance()
+				? new CachingService(SUPPORTED_CACHING_PROVIDERS.REDIS, {
+						...redisServiceConfig,
+						transactionLogger: this.transactionLogger,
+					}).getInstance()
 				: undefined,
 			this.logger,
+			this.transactionLogger,
 			this.apm,
 		);
 	}
@@ -96,7 +104,7 @@ export class KafkaService {
 			return await this._admin.listTopics();
 		} catch (e) {
 			const err = new KafkaServiceError("Error listing topics", e);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -107,12 +115,12 @@ export class KafkaService {
 			const created = await this._admin.createTopics({
 				topics: [config],
 			});
-			if (created) this.logger.log(`Topic initialized successfully: ${config.topic}`);
-			else this.logger.log(`Topic already exists: ${config.topic}`);
+			if (created) this.transactionLogger.log(`Topic initialized successfully: ${config.topic}`);
+			else this.transactionLogger.log(`Topic already exists: ${config.topic}`);
 			return created;
 		} catch (e) {
 			const err = new KafkaServiceError(`Error creating topic - ${config.topic}`, e);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -147,11 +155,11 @@ export class KafkaService {
 				...userOpts,
 			});
 			// this._schemaRegistry.
-			this.logger.log(`Schema registered successfully - ${topic} with id: ${id}`);
+			this.transactionLogger.log(`Schema registered successfully - ${topic} with id: ${id}`);
 			return id;
 		} catch (err) {
 			const error = new KafkaServiceError(`Error registering schema - ${topic}`, err);
-			this.logger.error(error.message);
+			this.transactionLogger.error(error.message);
 			this.apm?.captureError(error);
 			throw error;
 		}
@@ -160,7 +168,7 @@ export class KafkaService {
 	private async readAVSCSchema(filePath: string): Promise<RawAvroSchema> {
 		if (!filePath.endsWith(".avsc")) {
 			const err = new KafkaServiceError("Invalid schema file type. Only .avsc files are allowed");
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -170,7 +178,7 @@ export class KafkaService {
 			return schema;
 		} catch (err) {
 			const error = new KafkaServiceError("Error reading schema file", err);
-			this.logger.error(error.message);
+			this.transactionLogger.error(error.message);
 			this.apm?.captureError(error);
 			throw error;
 		}

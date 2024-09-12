@@ -8,9 +8,16 @@ export const redisConfig: CachingServiceConfig<typeof SUPPORTED_CACHING_PROVIDER
 	type: SUPPORTED_CACHING_PROVIDERS.REDIS,
 	providerName: constants.CACHING_SERVICES.REDIS.PROVIDER_NAME,
 	global: true,
+	withTransactionLogger: true,
 	config: {
-		redisConfig: {},
-		logger: new Logger("RedisService"),
+		redisConfig: {
+			path: process.env.REDIS_URL!,
+			options: {
+				keyPrefix: `${process.env.PROJECT_NAME}:`,
+				connectionName: process.env.APP_NAME!,
+			},
+		},
 		apm,
+		logger: new Logger(constants.CACHING_SERVICES.REDIS.PROVIDER_NAME),
 	},
 };

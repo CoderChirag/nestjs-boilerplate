@@ -6,6 +6,7 @@ export interface CachingServiceConfig<T extends CACHE_TYPES> {
 	type: T;
 	providerName: string;
 	global?: boolean;
+	withTransactionLogger?: boolean;
 	config: ICachingServiceConfig<T>;
 }
 
@@ -19,6 +20,7 @@ export class CachingServiceModule {
 					cachingConfig.providerName,
 					cachingConfig.type,
 					cachingConfig.config,
+					cachingConfig.withTransactionLogger,
 				),
 			],
 			exports: [cachingConfig.providerName],

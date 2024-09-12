@@ -33,6 +33,7 @@ export interface IKafkaServiceConfig {
 		options?: SchemaRegistryAPIClientOptions;
 	};
 	logger?: Logger;
+	transactionLogger?: Logger;
 	apm?: Agent;
 	redisServiceConfig?: ICachingServiceConfig<typeof SUPPORTED_CACHING_PROVIDERS.REDIS>;
 }
@@ -72,7 +73,7 @@ export type IASBServiceConfig = (
 			namespace: string;
 			credential: TokenCredential | NamedKeyCredential | SASCredential;
 	  }
-) & { options?: ServiceBusClientOptions; logger?: Logger; apm?: Agent };
+) & { options?: ServiceBusClientOptions; logger?: Logger; transactionLogger?: Logger; apm?: Agent };
 
 export interface IASBQueueMessage {
 	messageId?: string;

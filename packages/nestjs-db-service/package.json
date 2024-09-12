@@ -19,7 +19,8 @@
 	},
 	"dependencies": {
 		"@nestjs/common": "^10.0.0",
-		"db-service": "*"
+		"db-service": "*",
+		"nestjs-pino": "^4.1.0"
 	},
 	"devDependencies": {
 		"@types/node": "^20.3.1",

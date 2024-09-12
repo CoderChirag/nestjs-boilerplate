@@ -23,6 +23,7 @@ export interface IRedisServiceConfig {
 		  };
 
 	logger?: Logger;
+	transactionLogger?: Logger;
 	apm?: Agent;
 }
 

@@ -9,14 +9,16 @@ export class ASBService {
 	private readonly _client;
 	private readonly _apm?: Agent;
 	private readonly _logger: Logger;
+	private readonly _transactionLogger: Logger;
 
 	private readonly _producer: ASBProducerService;
 	private readonly _consumer: ASBConsumerService;
 
 	constructor(config: IASBServiceConfig) {
-		const { logger, apm } = config;
+		const { logger, transactionLogger, apm } = config;
 		this._apm = apm;
 		this._logger = logger ?? console;
+		this._transactionLogger = transactionLogger ?? this._logger;
 
 		if ("connectionString" in config) this._client = new ServiceBusClient(config.connectionString);
 		else if ("namespace" in config)
@@ -28,8 +30,18 @@ export class ASBService {
 			throw err;
 		}
 
-		this._producer = new ASBProducerService(this._client, this._logger, this._apm);
-		this._consumer = new ASBConsumerService(this._client, this._logger, this._apm);
+		this._producer = new ASBProducerService(
+			this._client,
+			this._logger,
+			this._transactionLogger,
+			this._apm,
+		);
+		this._consumer = new ASBConsumerService(
+			this._client,
+			this._logger,
+			this._transactionLogger,
+			this._apm,
+		);
 		this._logger.log("ASBService Successfully initialized");
 	}
 

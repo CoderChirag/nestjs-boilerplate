@@ -29,6 +29,7 @@ export interface IMongoConfigOptions<S extends MongoSchemasType> {
 	configOptions?: MongoConnectOptions;
 	hooks?: (schemas: S) => void | Promise<void>;
 	logger?: Logger;
+	transactionLogger?: Logger;
 	apm?: Agent;
 }
 export interface ISqlConfigOptions<M extends SqlModelsType> {
@@ -37,6 +38,7 @@ export interface ISqlConfigOptions<M extends SqlModelsType> {
 	models: M;
 	dialectOptions?: SequelizeOptions;
 	logger?: Logger;
+	transactionLogger?: Logger;
 	apm?: Agent;
 }
 

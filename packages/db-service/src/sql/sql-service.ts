@@ -7,6 +7,7 @@ import { Logger } from "@repo/utility-types";
 
 export class SqlService<T extends SqlModelsType> implements IDBService {
 	private logger: Logger;
+	private transactionLogger: Logger;
 	private apm?: Agent;
 	private modelsRef: T;
 	public models: ISqlModels<T> = {} as ISqlModels<T>;
@@ -20,12 +21,14 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 		models: T,
 		dialectOptions?: Options,
 		logger?: Logger,
+		transactionLogger?: Logger,
 		apm?: Agent,
 	) {
 		this.connectionString = connectionString;
 		this.dialectOptions = dialectOptions ?? {};
 		this.modelsRef = models;
 		this.logger = logger ?? console;
+		this.transactionLogger = transactionLogger ?? this.logger;
 		this.apm = apm;
 	}
 
@@ -71,7 +74,7 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 			return true;
 		} catch (e) {
 			const err = new SqlServiceError("Error authenticating to sequelize", e);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			return false;
 		}
@@ -94,7 +97,7 @@ export class SqlService<T extends SqlModelsType> implements IDBService {
 			return await this.dbConnectionRef.sync();
 		} catch (e) {
 			const err = new SqlServiceError("Error syncing sequelize connection", e);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -109,6 +112,15 @@ export const getSqlService = <T extends Record<string, (db: Sequelize) => Model<
 	connectionString: string,
 	models: T,
 	dialectOptions?: Options,
-	logger?: any,
+	logger?: Logger,
+	transactionLogger?: Logger,
 	apm?: Agent,
-) => new SqlService(connectionString, models, dialectOptions, logger, apm) as ISqlService<T>;
+) =>
+	new SqlService(
+		connectionString,
+		models,
+		dialectOptions,
+		logger,
+		transactionLogger,
+		apm,
+	) as ISqlService<T>;

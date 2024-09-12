@@ -9,6 +9,7 @@ import { Logger } from "@nestjs/common";
 export const dbConfigs: Record<string, DbConfigOptions<DB_TYPES, IConfigModelsOrSchemas>> = {
 	mongo: {
 		providerName: constants.DB_SERVICES.MONGO_DB_SERVICE.PROVIDER_NAME,
+		withTransactionLogger: true,
 		type: SUPPORTED_DBS.MONGO_DB,
 		connectionString: process.env.MONGO_CONNECTION_STRING!,
 		schemas: SCHEMAS.todos,
@@ -17,6 +18,7 @@ export const dbConfigs: Record<string, DbConfigOptions<DB_TYPES, IConfigModelsOr
 	},
 	sql: {
 		providerName: constants.DB_SERVICES.SQL_DB_SERVICE.PROVIDER_NAME,
+		withTransactionLogger: true,
 		type: SUPPORTED_DBS.SQL,
 		connectionString: process.env.SQL_CONNECTION_STRING!,
 		models: MODELS.todos,

@@ -1,11 +1,4 @@
-import {
-	ConnectOptions,
-	Connection,
-	Schema,
-	connections,
-	createConnection,
-	connect,
-} from "mongoose";
+import { ConnectOptions, Connection, Schema, connections, connect } from "mongoose";
 import type { IMongoModels, IMongoService, MongoSchemasType } from "../types";
 import { IDBService } from "../interfaces";
 import { Agent } from "elastic-apm-node";
@@ -14,6 +7,7 @@ import { Logger } from "@repo/utility-types";
 
 export class MongoService<S extends Record<string, Schema<any>>> implements IDBService {
 	private logger: Logger;
+	private transactionLogger: Logger;
 	private apm?: Agent;
 
 	public schemas: S;
@@ -30,6 +24,7 @@ export class MongoService<S extends Record<string, Schema<any>>> implements IDBS
 		configOptions?: ConnectOptions,
 		hooks?: (schemas: S) => void | Promise<void>,
 		logger?: Logger,
+		transactionLogger?: Logger,
 		apm?: Agent,
 	) {
 		this.connectionString = connectionString;
@@ -37,6 +32,7 @@ export class MongoService<S extends Record<string, Schema<any>>> implements IDBS
 		this.configOptions = configOptions ?? {};
 		this.hooks = hooks ?? (() => {});
 		this.logger = logger ?? console;
+		this.transactionLogger = transactionLogger ?? this.logger;
 		this.apm = apm;
 	}
 
@@ -102,7 +98,8 @@ export const getMongoService = <S extends MongoSchemasType>(
 	schemas: S,
 	configOptions?: ConnectOptions,
 	hooks?: (schemas: S) => void | Promise<void>,
-	logger?: any,
+	logger?: Logger,
+	transactionLogger?: Logger,
 	apm?: Agent,
 ) =>
 	new MongoService(
@@ -111,5 +108,6 @@ export const getMongoService = <S extends MongoSchemasType>(
 		configOptions,
 		hooks,
 		logger,
+		transactionLogger,
 		apm,
 	) as IMongoService<S>;

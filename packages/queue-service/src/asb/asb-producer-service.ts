@@ -6,13 +6,15 @@ import { ASBProducerServiceError } from "../exceptions/asb";
 
 export class ASBProducerService {
 	private readonly _logger: Logger;
+	private readonly _transactionLogger: Logger;
 	private readonly _apm?: Agent;
 
 	private readonly _client: ServiceBusClient;
 
-	constructor(client: ServiceBusClient, logger: Logger, apm?: Agent) {
+	constructor(client: ServiceBusClient, logger: Logger, transactionLogger: Logger, apm?: Agent) {
 		this._client = client;
 		this._logger = logger;
+		this._transactionLogger = transactionLogger;
 		this._apm = apm;
 	}
 
@@ -28,14 +30,14 @@ export class ASBProducerService {
 		span?.setServiceTarget("Message Queue", "ASB");
 		span?.setType("messaging");
 
-		this._logger.log(
+		this._transactionLogger.log(
 			`[ASBProducerService] Publishing message to ${queueName}: ${JSON.stringify(message)}`,
 		);
 
 		const sender = this._client.createSender(queueName);
 		try {
 			const res = await this.sendMessage<T>(sender, message, queueName);
-			this._logger.log(`[ASBProducerService] Published message to ${queueName}`);
+			this._transactionLogger.log(`[ASBProducerService] Published message to ${queueName}`);
 			span?.setOutcome("success");
 			return res;
 		} catch (e) {
@@ -83,7 +85,7 @@ export class ASBProducerService {
 			}
 		} catch (e) {
 			const err = new ASBProducerServiceError("Error sending message to ASB", e);
-			this._logger.error(err.message);
+			this._transactionLogger.error(err.message);
 			this._apm?.captureError(err);
 			throw err;
 		}
@@ -105,14 +107,16 @@ export class ASBProducerService {
 		const sender = this._client.createSender(queueName);
 		try {
 			await sender.cancelScheduledMessages(sequenceNo);
-			this._logger.log(`[ASBProducerService] Cancelled scheduled message in ${queueName}`);
+			this._transactionLogger.log(
+				`[ASBProducerService] Cancelled scheduled message in ${queueName}`,
+			);
 			span?.setOutcome("success");
 		} catch (e) {
 			const err = new ASBProducerServiceError(
 				`Error cancelling scheduled message in ASB(${queueName}) for sequenceNo: ${sequenceNo}`,
 				e,
 			);
-			this._logger.error(err.message);
+			this._transactionLogger.error(err.message);
 			this._apm?.captureError(err);
 			span?.setOutcome("failure");
 			throw err;

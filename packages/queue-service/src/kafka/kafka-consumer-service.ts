@@ -31,6 +31,7 @@ export class KafkaConsumerService {
 	private _consumers: Consumer[] = [];
 
 	private logger: Logger;
+	private transactionLogger: Logger;
 	private apm?: Agent;
 	private cachingService?: ICachingServiceInstance<typeof SUPPORTED_CACHING_PROVIDERS.REDIS>;
 
@@ -40,12 +41,14 @@ export class KafkaConsumerService {
 		_schemaRegistry: SchemaRegistry,
 		cachingService?: ICachingServiceInstance<typeof SUPPORTED_CACHING_PROVIDERS.REDIS>,
 		logger?: Logger,
+		transactionLogger?: Logger,
 		apm?: Agent,
 	) {
 		this._client = _client;
 		this._producer = _producer;
 		this._schemaRegistry = _schemaRegistry;
 		this.logger = logger ?? console;
+		this.transactionLogger = transactionLogger ?? this.logger;
 		this.apm = apm;
 		this.cachingService = cachingService;
 	}
@@ -80,7 +83,7 @@ export class KafkaConsumerService {
 
 				try {
 					const messageHeaders = this.parseMessageHeaders(message.headers || {});
-					this.logger.log(
+					this.transactionLogger.log(
 						`[KafkaConsumerService] [ConsumerRun - ${topic}] ----- EACHMESSAGES ----   ${JSON.stringify(
 							{
 								topic: topic,
@@ -129,7 +132,7 @@ export class KafkaConsumerService {
 							e instanceof Error ? e.message : new Error(e?.toString() || "Unknown Error").message,
 							e,
 						);
-						this.logger.error((err as KafkaConsumerRunError).message);
+						this.transactionLogger.error((err as KafkaConsumerRunError).message);
 						this.apm?.captureError(err as KafkaConsumerRunError);
 					}
 
@@ -174,7 +177,9 @@ export class KafkaConsumerService {
 
 	private async sendHeartbeat(topic: string, heartbeat: () => Promise<void>) {
 		try {
-			this.logger.log(`[KafkaConsumerService] [ConsumerRun - ${topic}] Sending Heartbeat...`);
+			this.transactionLogger.log(
+				`[KafkaConsumerService] [ConsumerRun - ${topic}] Sending Heartbeat...`,
+			);
 			await heartbeat();
 		} catch (e) {
 			const err = new KafkaConsumerRunError(
@@ -182,7 +187,7 @@ export class KafkaConsumerService {
 				`Error in sending heartbeat while consuming message from topic - ${topic}`,
 				e,
 			);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 		}
 	}
@@ -211,7 +216,7 @@ export class KafkaConsumerService {
 				`Error checking offset for message from Kafka topic - ${topic}`,
 				e,
 			);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -231,7 +236,7 @@ export class KafkaConsumerService {
 				`Error publishing offset for message from Kafka topic - ${topic}`,
 				e,
 			);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 		}
 	}
@@ -242,7 +247,9 @@ export class KafkaConsumerService {
 		schemaEnabled: boolean = false,
 	): Promise<IKafkaMessageProcessorMessageArg<T>> {
 		try {
-			this.logger.log(`[KafkaConsumerService] [ConsumerRun - ${topic}] Decoding Message...`);
+			this.transactionLogger.log(
+				`[KafkaConsumerService] [ConsumerRun - ${topic}] Decoding Message...`,
+			);
 			return {
 				key: message.key?.toString() || "",
 				value: message.value
@@ -258,7 +265,7 @@ export class KafkaConsumerService {
 				`Error decoding message from Kafka topic - ${topic}`,
 				e,
 			);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -271,7 +278,7 @@ export class KafkaConsumerService {
 		...args: DropFirst<Parameters<T>>
 	) {
 		try {
-			this.logger.log(
+			this.transactionLogger.log(
 				`[KafkaConsumerService] [ConsumerRun - ${topic}] Running Message Processor...`,
 			);
 			await processor(msg, ...args);
@@ -281,7 +288,7 @@ export class KafkaConsumerService {
 				`Error running message processor on Kafka topic - ${topic}`,
 				e,
 			);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -289,7 +296,9 @@ export class KafkaConsumerService {
 
 	private async publishToDlq(topic: string, message: KafkaMessage, error: KafkaConsumerRunError) {
 		try {
-			this.logger.log(`[KafkaConsumerService] [ConsumerRun - ${topic}] Publishing to DLQ...`);
+			this.transactionLogger.log(
+				`[KafkaConsumerService] [ConsumerRun - ${topic}] Publishing to DLQ...`,
+			);
 			const dlqMsg: IKafkaMessage = {
 				key: message.key?.toString() || DLQ_ERROR_SOURCES.CONSUMER,
 				value: {
@@ -310,7 +319,7 @@ export class KafkaConsumerService {
 				`Error publishing to DLQ for message from Kafka topic - ${topic}`,
 				e,
 			);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 		}
 	}
@@ -330,7 +339,7 @@ export class KafkaConsumerService {
 		await this.subscribeTopics(consumer, subscription);
 		await this.run(consumer, subscription, runConfig);
 
-		this.logger.log(
+		this.transactionLogger.log(
 			`[KafkaConsumerService] Subscribed To Topics: ${subscription.topics.join(", ")}`,
 		);
 
@@ -343,7 +352,7 @@ export class KafkaConsumerService {
 			await consumer.connect();
 		} catch (e) {
 			const err = new KafkaConsumerServiceError("Error connecting to Kafka Consumer", e);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -357,7 +366,7 @@ export class KafkaConsumerService {
 				`Error subscribing to topics - ${subscription.topics}`,
 				e,
 			);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -376,7 +385,7 @@ export class KafkaConsumerService {
 				`Error running Kafka Consumer for topics - ${subscription.topics}`,
 				e,
 			);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}

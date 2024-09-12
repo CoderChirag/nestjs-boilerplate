@@ -81,11 +81,9 @@ export const loggerConfigurations: PinoParams = {
 		},
 		formatters,
 		genReqId: function (req: any, res: any) {
-			if (req.id) return req.id;
-			let id = req.get("X-Request-Id");
-			if (id) return id;
-			id = apm?.currentTraceIds["trace.id"] || randomUUID();
+			const id = req.get("X-Request-Id") || apm?.currentTraceIds["trace.id"] || randomUUID();
 			res.header("X-Request-Id", id);
+			apm.setLabel("X-Request-Id", id);
 			return id;
 		},
 		serializers: {

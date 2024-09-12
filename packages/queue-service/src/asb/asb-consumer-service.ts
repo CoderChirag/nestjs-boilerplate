@@ -19,14 +19,16 @@ import { ASBConsumerProcessorError, ASBConsumerServiceError } from "../exception
 
 export class ASBConsumerService {
 	private readonly _logger: Logger;
+	private readonly _transactionLogger: Logger;
 	private readonly _apm?: Agent;
 
 	private readonly _client: ServiceBusClient;
 	private _consumers: ServiceBusReceiver[] = [];
 
-	constructor(client: ServiceBusClient, logger: Logger, apm?: Agent) {
+	constructor(client: ServiceBusClient, logger: Logger, transactionLogger: Logger, apm?: Agent) {
 		this._client = client;
 		this._logger = logger;
+		this._transactionLogger = transactionLogger;
 		this._apm = apm;
 	}
 
@@ -47,7 +49,7 @@ export class ASBConsumerService {
 	}
 
 	async defaultErrorProcessor(error: ASBConsumerProcessorError) {
-		this._logger?.error(
+		this._transactionLogger?.error(
 			`[ASBConsumerErrorProcessor] Error Occurred in ASB Consumer ${JSON.stringify(error)}`,
 		);
 	}
@@ -89,7 +91,7 @@ export class ASBConsumerService {
 			subscriptionConfig,
 		);
 
-		this._logger.log(`[ASBConsumerService] Subscribed To ASB QUEUE: ${queue}`);
+		this._transactionLogger.log(`[ASBConsumerService] Subscribed To ASB QUEUE: ${queue}`);
 		this._consumers.push(queueReceiver);
 	}
 
@@ -103,7 +105,7 @@ export class ASBConsumerService {
 			"queueName" in consumerConfig ? consumerConfig.queueName : consumerConfig.topicName;
 		const { transaction, span } = this.setupTransaction(consumerConfig, messageResponse);
 
-		this._logger.log(
+		this._transactionLogger.log(
 			`[ASBConsumerService] [ConsumerRun - ${queue}] -----  ${JSON.stringify({
 				queue,
 				messageId: messageResponse.messageId,
@@ -126,7 +128,7 @@ export class ASBConsumerService {
 			span?.setOutcome("success");
 		} catch (e) {
 			span?.setOutcome("failure");
-			this._logger.error("[ASBConsumerService] Error while processing message");
+			this._transactionLogger.error("[ASBConsumerService] Error while processing message");
 			throw e;
 		} finally {
 			span?.end();
@@ -182,7 +184,7 @@ export class ASBConsumerService {
 			error: errorArgs.error,
 		});
 		this._apm?.captureError(err);
-		this._logger.error(err.message);
+		this._transactionLogger.error(err.message);
 		return await errorProcessor(err);
 	}
 
@@ -205,14 +207,14 @@ export class ASBConsumerService {
 		const receiver = this._client.createReceiver(queueName);
 		try {
 			await receiver.completeMessage(message);
-			this._logger.log(`[ASBConsumerService] Message Deleted from Queue(${queueName})`);
+			this._transactionLogger.log(`[ASBConsumerService] Message Deleted from Queue(${queueName})`);
 			span?.setOutcome("success");
 		} catch (e) {
 			const err = new ASBConsumerServiceError(
 				`Error deleting message from ASB Queue(${queueName})`,
 				e,
 			);
-			this._logger.error(err.message);
+			this._transactionLogger.error(err.message);
 			this._apm?.captureError(err);
 			span?.setOutcome("failure");
 			throw err;
@@ -243,14 +245,16 @@ export class ASBConsumerService {
 		const receiver = this._client.createReceiver(queueName);
 		try {
 			await receiver.abandonMessage(message);
-			this._logger.log(`[ASBConsumerService] Message Abandoned from Queue(${queueName})`);
+			this._transactionLogger.log(
+				`[ASBConsumerService] Message Abandoned from Queue(${queueName})`,
+			);
 			span?.setOutcome("success");
 		} catch (e) {
 			const err = new ASBConsumerServiceError(
 				`Error abandoning message from ASB Queue(${queueName})`,
 				e,
 			);
-			this._logger.error(err.message);
+			this._transactionLogger.error(err.message);
 			this._apm?.captureError(err);
 			span?.setOutcome("failure");
 			throw err;
@@ -278,14 +282,16 @@ export class ASBConsumerService {
 		const receiver = this._client.createReceiver(queueName);
 		try {
 			await receiver.deadLetterMessage(message);
-			this._logger.log(`[ASBConsumerService] Message Moved to DLQ from Queue(${queueName})`);
+			this._transactionLogger.log(
+				`[ASBConsumerService] Message Moved to DLQ from Queue(${queueName})`,
+			);
 			span?.setOutcome("success");
 		} catch (e) {
 			const err = new ASBConsumerServiceError(
 				`Error moving message to dlq from ASB Queue(${queueName})`,
 				e,
 			);
-			this._logger.error(err.message);
+			this._transactionLogger.error(err.message);
 			this._apm?.captureError(err);
 			span?.setOutcome("failure");
 			throw err;

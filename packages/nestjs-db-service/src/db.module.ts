@@ -5,7 +5,7 @@ import { DBProvider } from "./db.provider";
 export type ConfigOptions<T extends DB_TYPES, S extends IConfigModelsOrSchemas> = IDBConfigOptions<
 	T,
 	S
-> & { providerName: string };
+> & { providerName: string; withTransactionLogger?: boolean };
 
 @Module({})
 export class DBModule {

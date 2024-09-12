@@ -15,6 +15,7 @@ export class KafkaProducerService {
 	private _producer: Producer;
 
 	private logger: Logger;
+	private transactionLogger: Logger;
 	private apm?: Agent;
 
 	constructor(
@@ -22,11 +23,13 @@ export class KafkaProducerService {
 		_schemaRegistry: SchemaRegistry,
 		config?: ProducerConfig,
 		logger?: Logger,
+		transactionLogger?: Logger,
 		apm?: Agent,
 	) {
 		this._client = _client;
 		this._schemaRegistry = _schemaRegistry;
 		this.logger = logger ?? console;
+		this.transactionLogger = transactionLogger ?? this.logger;
 		this.apm = apm;
 
 		this._producer = this._client.producer({
@@ -67,7 +70,7 @@ export class KafkaProducerService {
 			if (this.apm?.currentTransaction?.ids)
 				headers["transaction"] = JSON.stringify(this.apm.currentTransaction.ids);
 
-			this.logger.log(
+			this.transactionLogger.log(
 				`[KafkaProducerService] Publishing message to ${topicName}: ${JSON.stringify(message)}`,
 			);
 			console.log(schemaEnabled);
@@ -86,11 +89,11 @@ export class KafkaProducerService {
 					},
 				],
 			});
-			this.logger.log(`[KafkaProducerService] Published message to ${topicName}`);
+			this.transactionLogger.log(`[KafkaProducerService] Published message to ${topicName}`);
 			return result;
 		} catch (e) {
 			const err = new KafkaProducerServiceError("Error publishing message to Kafka Producer", e);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}

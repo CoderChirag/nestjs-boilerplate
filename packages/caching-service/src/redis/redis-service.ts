@@ -8,11 +8,13 @@ export class RedisService {
 	private _client: Redis;
 
 	private logger: Logger;
+	private transactionLogger: Logger;
 	private apm?: Agent;
 
 	constructor(config: IRedisServiceConfig) {
-		const { redisConfig, apm, logger } = config;
+		const { redisConfig, apm, logger, transactionLogger } = config;
 		this.logger = logger ?? console;
+		this.transactionLogger = transactionLogger ?? this.logger;
 		this.apm = apm;
 
 		if ("port" in redisConfig) {
@@ -37,8 +39,8 @@ export class RedisService {
 			this.logger.log(`Connected to redis: ${JSON.stringify(this._client.options)}`);
 			if (!this._client.options.connectionName)
 				this._client.client("SETNAME", process.env.APP_NAME!, (err, res) => {
-					if (err) this.logger.error(`Failed to async set client name for redis: ${err.message}`);
-					else this.logger.log(`Redis Client name async set to: ${process.env.APP_NAME}`);
+					if (err) this.logger.error(`Failed to set client name for redis: ${err.message}`);
+					else this.logger.log(`Redis Client name set to: ${process.env.APP_NAME}`);
 				});
 		});
 
@@ -66,7 +68,7 @@ export class RedisService {
 			return await this._client.get(key);
 		} catch (e) {
 			const err = new RedisServiceError(`Error getting key(${key})`, e);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
@@ -298,7 +300,7 @@ export class RedisService {
 			return await (this._client.set as any)(...args);
 		} catch (e) {
 			const err = new RedisServiceError(`Error setting key(${args[0]})`, e);
-			this.logger.error(err.message);
+			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
