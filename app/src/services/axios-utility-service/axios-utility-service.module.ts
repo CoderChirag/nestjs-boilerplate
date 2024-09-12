@@ -1,11 +1,11 @@
 import { DynamicModule, Module } from "@nestjs/common";
-import { AxiosDefaults } from "axios";
+import { CreateAxiosDefaults } from "axios";
 import { AxiosUtilityService } from "./axios-utility.service";
 import { Logger } from "nestjs-pino";
 
 @Module({})
 export class AxiosUtilityServiceModule {
-	static forFeature(config: AxiosDefaults): DynamicModule {
+	static forFeature(config: CreateAxiosDefaults): DynamicModule {
 		return {
 			module: AxiosUtilityServiceModule,
 			providers: [
