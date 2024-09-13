@@ -11,6 +11,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 		const ctx = host.switchToHttp();
 		const response = ctx.getResponse<Response>();
 		const status = exception?.status ?? constants.HTTP_RESPONSE_CODES.INTERNAL_SERVER_ERROR.CODE;
+		console.log(exception);
 
 		const error = errorCodeRespConstructor(exception, status);
 		response.status(status).json(error);
@@ -29,7 +30,7 @@ function errorCodeRespConstructor(error: any, status: number) {
 			: (error?.message ?? constants.HTTP_RESPONSE_CODES.INTERNAL_SERVER_ERROR.MESSAGE),
 		failures: {
 			message: error?.message ?? constants.HTTP_RESPONSE_CODES.INTERNAL_SERVER_ERROR.MESSAGE,
-			...(error?.response?.data ?? error?.data ?? {}),
+			...(error?.response?.data ?? error?.response ?? error?.data ?? {}),
 		},
 	};
 

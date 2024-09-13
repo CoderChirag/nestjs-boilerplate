@@ -1,10 +1,10 @@
 import { Test } from "@nestjs/testing";
 import { TodosProcessorService } from "src/modules/todos-processor/todos-processor.service";
-import { mockLoggerService } from "test/unit/mocks/common.mock";
 import { MockASBTodoEntity, MockKafkaTodoEntity } from "./todos-processor.mock";
 import { Logger } from "@nestjs/common";
 import { IASBMessageProcessorMessageArg } from "queue-service";
 import { TodoEntity } from "src/utility/entities/todos/todo.entity";
+import { MockPinoLoggerService } from "test/unit/mocks/common.mock";
 
 describe("TodosProcessorService", () => {
 	let todosProcessorService: TodosProcessorService;
@@ -25,7 +25,7 @@ describe("TodosProcessorService", () => {
 		it("should process the published todos", async () => {
 			const result = await todosProcessorService.processTodos(
 				MockKafkaTodoEntity,
-				mockLoggerService as unknown as Logger,
+				MockPinoLoggerService as unknown as Logger,
 			);
 			expect(result).toBe(undefined);
 		});
@@ -35,7 +35,7 @@ describe("TodosProcessorService", () => {
 		it("should process the published todos", async () => {
 			const result = await todosProcessorService.processTodosFromASB(
 				MockASBTodoEntity as unknown as IASBMessageProcessorMessageArg<TodoEntity>,
-				mockLoggerService as unknown as Logger,
+				MockPinoLoggerService as unknown as Logger,
 			);
 			expect(result).toBe(undefined);
 		});

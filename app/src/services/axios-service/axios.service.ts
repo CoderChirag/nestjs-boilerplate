@@ -9,7 +9,7 @@ import {
 import { Logger } from "nestjs-pino";
 
 @Injectable()
-export class AxiosUtilityService {
+export class AxiosService {
 	private readonly _axios: AxiosInstance;
 
 	private readonly defaultRequestInterceptor = (config: InternalAxiosRequestConfig) => {

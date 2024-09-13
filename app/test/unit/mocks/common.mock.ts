@@ -1,4 +1,5 @@
-import { Logger, Type as ClassType } from "@nestjs/common";
+import { Type as ClassType } from "@nestjs/common";
+import { Logger } from "nestjs-pino";
 import { MockFunctionMetadata, ModuleMocker } from "jest-mock";
 import { TodoStatus } from "src/constants";
 import { WithMock } from "../types";
@@ -27,4 +28,4 @@ const loggerMetadata = moduleMocker.getMetadata(Logger) as MockFunctionMetadata<
 	ClassType<WithMock<Logger>>
 >;
 const MockLogger = moduleMocker.generateFromMetadata(loggerMetadata);
-export const mockLoggerService = new MockLogger();
+export const MockPinoLoggerService = new MockLogger();
