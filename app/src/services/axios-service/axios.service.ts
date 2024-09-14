@@ -14,7 +14,7 @@ export class AxiosService {
 
 	private readonly defaultRequestInterceptor = (config: InternalAxiosRequestConfig) => {
 		this.logger.log(
-			`Sending AXIOS Request([${config.method?.toUpperCase()}] ${config.baseURL}${config.url})`,
+			`Sending AXIOS Request([${config.method?.toUpperCase()}] ${config.baseURL ?? ""}${config.url ?? ""})`,
 		);
 		return config;
 	};
@@ -28,7 +28,7 @@ export class AxiosService {
 
 	private readonly defaultErrorInterceptor = (error: any) => {
 		this.logger.error(
-			`AXIOS Error(${error.config.baseURL}${error.config.url}): ${JSON.stringify({ status: error.response?.status, data: error.response?.data })}`,
+			`AXIOS Error(${error.config.baseURL ?? ""}${error.config.url ?? ""}): ${JSON.stringify({ status: error.response?.status, data: error.response?.data })}`,
 		);
 		return Promise.reject(error);
 	};

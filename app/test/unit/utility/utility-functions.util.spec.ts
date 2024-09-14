@@ -1,4 +1,4 @@
-import { handleError, sigUsrAndSigtermTimeDiffLog } from "src/utility/utility-functions.util";
+import { handleAxiosError, sigUsrAndSigtermTimeDiffLog } from "src/utility/utility-functions.util";
 import { mockSigUsrAndSigtermTimeDiffLogParams } from "./utility.mock";
 import { AxiosError } from "axios";
 
@@ -11,15 +11,15 @@ describe("UtilityFunctions", () => {
 		});
 	});
 
-	describe("handleError", () => {
+	describe("handleAxiosError", () => {
 		it("should throw an HttpException with the Axios error response message and status code", () => {
 			const error = new AxiosError("error");
-			expect(() => handleError(error)).toThrow();
+			expect(() => handleAxiosError(error)).toThrow();
 		});
 
 		it("should throw an HttpException with the error message and status code", () => {
 			const error = new Error("Test error");
-			expect(() => handleError(error)).toThrow();
+			expect(() => handleAxiosError(error)).toThrow();
 		});
 	});
 });

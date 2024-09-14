@@ -11,7 +11,7 @@ export const sigUsrAndSigtermTimeDiffLog = (
 	logger.log(`Time difference between SIGUSR1 and SIGTERM: ${timeDiff} milliseconds`);
 };
 
-export function handleError(e: unknown) {
+export function handleAxiosError(e: unknown, status?: number): never {
 	if (isAxiosError(e))
 		throw new HttpException(
 			{
@@ -19,7 +19,7 @@ export function handleError(e: unknown) {
 				message: e.message,
 				data: { ...e.response?.data },
 			},
-			constants.HTTP_RESPONSE_CODES.FAILED_DEPENDENCY.CODE,
+			status ?? constants.HTTP_RESPONSE_CODES.FAILED_DEPENDENCY.CODE,
 		);
 
 	throw new HttpException(
