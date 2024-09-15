@@ -80,15 +80,23 @@ export class KafkaConsumerService {
 		const runConfig: ConsumerRunConfig = {
 			eachMessage: async ({ message, topic, partition, heartbeat }) => {
 				const { transaction, span } = this.setupTransaction(topic, message);
-
+				let decodedMsg:
+					| IKafkaMessageProcessorMessageArg<
+							InferKafkaMessageProcessorMessageArgValue<Parameters<T>[0]>
+					  >
+					| undefined = undefined;
 				try {
 					const messageHeaders = this.parseMessageHeaders(message.headers || {});
+					decodedMsg = await this.decodeMsg<
+						InferKafkaMessageProcessorMessageArgValue<Parameters<T>[0]>
+					>(topic, message, schemaEnabled);
+
 					this.transactionLogger.log(
 						`[KafkaConsumerService] [ConsumerRun - ${topic}] ----- EACHMESSAGES ----   ${JSON.stringify(
 							{
 								topic: topic,
-								key: message.key ? message.key.toString() : "",
-								value: message.value ? message.value.toString() : "",
+								key: decodedMsg.key ? decodedMsg.key : "",
+								value: decodedMsg.value ? decodedMsg.value : "",
 								headers: messageHeaders,
 								offset: message.offset,
 								partition: partition,
@@ -112,10 +120,6 @@ export class KafkaConsumerService {
 						return;
 					}
 
-					const decodedMsg = await this.decodeMsg<
-						InferKafkaMessageProcessorMessageArgValue<Parameters<T>[0]>
-					>(topic, message, schemaEnabled);
-
 					span?.setLabel("kafka_consumer_key", decodedMsg.key);
 					span?.setLabel("kafka_consumer_message", JSON.stringify(decodedMsg.value));
 
@@ -136,7 +140,8 @@ export class KafkaConsumerService {
 						this.apm?.captureError(err as KafkaConsumerRunError);
 					}
 
-					if (dlqRequired) await this.publishToDlq(topic, message, err as KafkaConsumerRunError);
+					if (dlqRequired)
+						await this.publishToDlq(topic, decodedMsg || message, err as KafkaConsumerRunError);
 					span?.setOutcome("failure");
 				} finally {
 					span?.end();
@@ -283,18 +288,18 @@ export class KafkaConsumerService {
 			);
 			await processor(msg, ...args);
 		} catch (e) {
-			const err = new KafkaConsumerRunError(
-				topic,
-				`Error running message processor on Kafka topic - ${topic}`,
-				e,
-			);
+			const err = new KafkaConsumerRunError(topic, `Error running message processor`, e);
 			this.transactionLogger.error(err.message);
 			this.apm?.captureError(err);
 			throw err;
 		}
 	}
 
-	private async publishToDlq(topic: string, message: KafkaMessage, error: KafkaConsumerRunError) {
+	private async publishToDlq(
+		topic: string,
+		message: IKafkaMessageProcessorMessageArg<any> | KafkaMessage,
+		error: KafkaConsumerRunError,
+	) {
 		try {
 			this.transactionLogger.log(
 				`[KafkaConsumerService] [ConsumerRun - ${topic}] Publishing to DLQ...`,

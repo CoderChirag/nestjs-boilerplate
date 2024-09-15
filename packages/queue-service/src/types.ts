@@ -20,7 +20,7 @@ import { ICachingServiceConfig, SUPPORTED_CACHING_PROVIDERS } from "caching-serv
 export type Required<T extends Record<string, any>, K extends keyof T> = T & {
 	[P in K]-?: T[P];
 };
-export type DropFirst<T extends any[]> = T extends [any, ...infer Rest] ? Rest : never;
+export type DropFirst<T extends any[]> = T extends [any, ...infer Rest] ? Rest : [];
 
 export type QUEUE_TYPES = (typeof SUPPORTED_QUEUES)[keyof typeof SUPPORTED_QUEUES];
 
