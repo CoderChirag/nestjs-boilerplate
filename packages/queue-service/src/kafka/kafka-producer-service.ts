@@ -73,7 +73,6 @@ export class KafkaProducerService {
 			this.transactionLogger.log(
 				`[KafkaProducerService] Publishing message to ${topicName}: ${JSON.stringify(message)}`,
 			);
-			console.log(schemaEnabled);
 			const result = await this._producer.send({
 				topic: topicName,
 				messages: [
