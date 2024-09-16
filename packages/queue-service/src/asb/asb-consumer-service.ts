@@ -103,7 +103,7 @@ export class ASBConsumerService {
 	) {
 		const queue =
 			"queueName" in consumerConfig ? consumerConfig.queueName : consumerConfig.topicName;
-		const { transaction, span } = this.setupTransaction(consumerConfig, messageResponse);
+		const { transaction } = this.setupTransaction(consumerConfig, messageResponse);
 
 		this._transactionLogger.log(
 			`[ASBConsumerService] [ConsumerRun - ${queue}] -----  ${JSON.stringify({
@@ -125,13 +125,10 @@ export class ASBConsumerService {
 				>,
 				...args,
 			);
-			span?.setOutcome("success");
 		} catch (e) {
-			span?.setOutcome("failure");
 			this._transactionLogger.error("[ASBConsumerService] Error while processing message");
 			throw e;
 		} finally {
-			span?.end();
 			transaction?.end();
 		}
 	}
@@ -153,18 +150,9 @@ export class ASBConsumerService {
 			},
 		);
 		transaction?.setLabel("asb_consumer_queue", queue);
-		const span = transaction?.startSpan(
-			`Processing ASB Message - ${queue}`,
-			"messaging",
-			"asb",
-			"receive",
-			{ exitSpan: true },
-		);
-		span?.setServiceTarget("ASB", queue);
-		span?.setLabel("asb_consumer_message_subject", messageResponse.subject);
-		span?.setLabel("asb_consumer_message_body", JSON.stringify(messageResponse.body));
+		transaction?.setLabel("asb_consumer_message_subject", messageResponse.subject);
 
-		return { transaction, span };
+		return { transaction };
 	}
 
 	private async processError(

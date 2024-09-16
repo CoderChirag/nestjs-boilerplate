@@ -79,7 +79,10 @@ export class KafkaConsumerService {
 		const { topics, fromBeginning, dlqRequired, schemaEnabled } = subscription;
 		const runConfig: ConsumerRunConfig = {
 			eachMessage: async ({ message, topic, partition, heartbeat }) => {
-				const { transaction, span } = this.setupTransaction(topic, message);
+				this.apm?.startTransaction("Testing", "messaging", {
+					childOf: this.apm?.currentTraceIds["trace.id"],
+				});
+				this.apm?.currentTransaction?.setLabel("kafka_consumer_topic", topic);
 				let decodedMsg:
 					| IKafkaMessageProcessorMessageArg<
 							InferKafkaMessageProcessorMessageArgValue<Parameters<T>[0]>
@@ -114,20 +117,14 @@ export class KafkaConsumerService {
 							parseInt(message.offset),
 						);
 					} catch (e) {
-						span?.setOutcome("failure");
-						span?.end();
-						transaction?.end();
 						return;
 					}
 
-					span?.setLabel("kafka_consumer_key", decodedMsg.key);
-					span?.setLabel("kafka_consumer_message", JSON.stringify(decodedMsg.value));
+					this.apm?.currentTransaction?.setLabel("kafka_consumer_key", decodedMsg.key);
 
 					await this.runProcessor<T>(topic, processor, decodedMsg, ...args);
 
 					await this.publishOffset(topic, consumerConfig.groupId, partition, message.offset);
-
-					span?.setOutcome("success");
 				} catch (e) {
 					let err = e;
 					if (!(err instanceof KafkaConsumerRunError)) {
@@ -142,32 +139,11 @@ export class KafkaConsumerService {
 
 					if (dlqRequired)
 						await this.publishToDlq(topic, decodedMsg || message, err as KafkaConsumerRunError);
-					span?.setOutcome("failure");
-				} finally {
-					span?.end();
-					transaction?.end();
 				}
 			},
 		};
 
 		await this.consume(consumerConfig, { topics, fromBeginning }, runConfig);
-	}
-
-	private setupTransaction(topic: string, message: KafkaMessage) {
-		const transaction = this.apm?.startTransaction(`Kafka Consumer - ${topic}`, "messaging", {
-			childOf: message.headers?.traceparent?.toString(),
-		});
-		transaction?.setLabel("kafka_consumer_topic", topic);
-		const span = transaction?.startSpan(
-			`Processing Kafka Message - ${topic}`,
-			"messaging",
-			"kafka",
-			"receive",
-			{ exitSpan: true },
-		);
-		span?.setServiceTarget("kafka", topic);
-
-		return { transaction, span };
 	}
 
 	private parseMessageHeaders(headers: IHeaders) {

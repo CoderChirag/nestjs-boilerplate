@@ -67,7 +67,10 @@ export class ASBProducerService {
 				...(sourceRequestId ? { sourceRequestId: sourceRequestId } : {}),
 				...(this._apm?.currentTraceparent ? { traceparent: this._apm?.currentTraceparent } : {}),
 				...(this._apm?.currentTraceIds
-					? { traceIds: JSON.stringify(this._apm?.currentTraceIds) }
+					? {
+							traceId: this._apm?.currentTraceIds["trace.id"],
+							transactionId: this._apm?.currentTraceIds["transaction.id"],
+						}
 					: {}),
 				isScheduledMessage: scheduleTimeUtc ? true : false,
 			},
