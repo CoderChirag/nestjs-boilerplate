@@ -79,9 +79,6 @@ export class KafkaConsumerService {
 		const { topics, fromBeginning, dlqRequired, schemaEnabled } = subscription;
 		const runConfig: ConsumerRunConfig = {
 			eachMessage: async ({ message, topic, partition, heartbeat }) => {
-				this.apm?.startTransaction("Testing", "messaging", {
-					childOf: this.apm?.currentTraceIds["trace.id"],
-				});
 				this.apm?.currentTransaction?.setLabel("kafka_consumer_topic", topic);
 				let decodedMsg:
 					| IKafkaMessageProcessorMessageArg<
