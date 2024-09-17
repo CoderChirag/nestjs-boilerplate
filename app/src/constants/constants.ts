@@ -12,9 +12,16 @@ export const constants = {
 		LIVENESS: {
 			FILE_PATH: "liveness/liveness.txt",
 		},
+		KAFKA_DLQ_TOPIC_SUFFIX: ".DLQ",
 		PUBLISH_TOPICS: {
-			TODOS_SQL: `todos-v1-${process.env.NODE_ENV}`,
-			TODOS_MONGO: `todos-v2-${process.env.NODE_ENV}`,
+			TODOS_SQL: {
+				TOPIC_NAME: `todos-v1-${process.env.NODE_ENV}`,
+				DLQ_REQUIRED: true,
+			},
+			TODOS_MONGO: {
+				TOPIC_NAME: `todos-v2-${process.env.NODE_ENV}`,,
+				DLQ_REQUIRED: true,
+			},
 		},
 		ASB_QUEUES: {
 			TODOS_SQL: `todos-v1-${process.env.NODE_ENV}`,

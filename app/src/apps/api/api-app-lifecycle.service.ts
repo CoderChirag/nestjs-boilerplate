@@ -50,9 +50,15 @@ export class ApiAppLifecycleService implements OnApplicationBootstrap, OnApplica
 	}
 
 	private async initializeTopics() {
-		const topics = Object.values(constants.INFRA.PUBLISH_TOPICS).map((topic) => ({ topic }));
-		for (const topic of topics) {
-			await this.kafkaService.createTopic(topic);
+		const topics = Object.values(constants.INFRA.PUBLISH_TOPICS).map(
+			({ TOPIC_NAME, DLQ_REQUIRED }) => ({ topic: TOPIC_NAME, dlqRequired: DLQ_REQUIRED }),
+		);
+		for (const { topic, dlqRequired } of topics) {
+			await this.kafkaService.createTopic({ topic });
+			if (dlqRequired)
+				await this.kafkaService.createTopic({
+					topic: `${topic}${constants.INFRA.KAFKA_DLQ_TOPIC_SUFFIX}`,
+				});
 		}
 	}
 }
