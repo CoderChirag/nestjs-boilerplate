@@ -29,7 +29,7 @@ export class TodosServiceV2 {
 		this.logger.log(`Todos-v2 Cached: ${res}`);
 		this.logger.log(await this.redis.get("todos-v2"));
 		await this.kafkaProducerService.publish(
-			constants.INFRA.PUBLISH_TOPICS.TODOS_MONGO,
+			constants.INFRA.PUBLISH_TOPICS.TODOS_MONGO.TOPIC_NAME,
 			{
 				key: "todos-v2",
 				value: todos[0],

@@ -26,7 +26,8 @@ export const kafkaQueueConfig: QueueConfig<typeof SUPPORTED_QUEUES.KAFKA> = {
 			redisConfig: {
 				path: process.env.REDIS_URL!,
 				options: {
-					keyPrefix: "kafka-offsets:",
+					keyPrefix: `kafka-offsets:`,
+					connectionName: `${process.env.APP_NAME}:kafka-offsets`,
 				},
 			},
 			logger: new Logger(constants.CACHING_SERVICES.REDIS.PROVIDER_NAME),

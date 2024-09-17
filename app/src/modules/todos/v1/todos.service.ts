@@ -32,7 +32,7 @@ export class TodosService {
 		this.logger.log(`Todos-v1 Cached: ${res}`);
 		this.logger.log(await this.redis.get("todos-v1"));
 		await this.kafkaProducerService.publish(
-			constants.INFRA.PUBLISH_TOPICS.TODOS_SQL,
+			constants.INFRA.PUBLISH_TOPICS.TODOS_SQL.TOPIC_NAME,
 			{
 				key: "todos",
 				value: todos[0],

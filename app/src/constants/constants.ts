@@ -19,7 +19,7 @@ export const constants = {
 				DLQ_REQUIRED: true,
 			},
 			TODOS_MONGO: {
-				TOPIC_NAME: `todos-v2-${process.env.NODE_ENV}`,,
+				TOPIC_NAME: `todos-v2-${process.env.NODE_ENV}`,
 				DLQ_REQUIRED: true,
 			},
 		},
