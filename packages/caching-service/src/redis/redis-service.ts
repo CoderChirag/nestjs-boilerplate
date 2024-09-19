@@ -65,6 +65,7 @@ export class RedisService {
 
 	async get(key: RedisKey) {
 		try {
+			this.transactionLogger.log(`Getting key(${key}) from redis`);
 			return await this._client.get(key);
 		} catch (e) {
 			const err = new RedisServiceError(`Error getting key(${key})`, e);
@@ -297,6 +298,7 @@ export class RedisService {
 	): Promise<string | null>;
 	async set(...args: any[]) {
 		try {
+			this.transactionLogger.log(`Setting key(${args[0]}) in redis: ${args[1]}`);
 			return await (this._client.set as any)(...args);
 		} catch (e) {
 			const err = new RedisServiceError(`Error setting key(${args[0]})`, e);
