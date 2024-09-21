@@ -1,13 +1,8 @@
 import { Agent } from "elastic-apm-node";
-import { Kafka, Partitioners, Producer, ProducerConfig } from "kafkajs";
+import { Kafka, Message, Partitioners, Producer, ProducerConfig } from "kafkajs";
 import { KafkaProducerServiceError } from "..";
 import { Logger } from "@repo/utility-types";
 import { SchemaRegistry } from "@kafkajs/confluent-schema-registry";
-
-export interface IKafkaMessage {
-	key: string;
-	value: object;
-}
 
 export class KafkaProducerService {
 	private _client: Kafka;
@@ -62,9 +57,12 @@ export class KafkaProducerService {
 		}
 	}
 
-	async publish(topicName: string, message: IKafkaMessage, schemaEnabled: boolean = false) {
+	async publish(
+		topicName: string,
+		message: Omit<Message, "value"> & { value: unknown },
+		schemaEnabled: boolean = false,
+	) {
 		try {
-			const { key, value } = message;
 			const headers = {};
 			this.apm?.currentTransaction?.setLabel("kafka_producer_topic", topicName);
 			if (this.apm?.currentTransaction?.ids)
@@ -77,13 +75,13 @@ export class KafkaProducerService {
 				topic: topicName,
 				messages: [
 					{
-						key,
+						...message,
 						value: schemaEnabled
 							? await this._schemaRegistry.encode(
 									await this._schemaRegistry.getLatestSchemaId(topicName),
-									value,
+									message.value,
 								)
-							: JSON.stringify(value),
+							: JSON.stringify(message.value),
 						headers,
 					},
 				],

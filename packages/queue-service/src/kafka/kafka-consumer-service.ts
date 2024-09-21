@@ -7,11 +7,11 @@ import {
 	IHeaders,
 	Kafka,
 	KafkaMessage,
+	Message,
 } from "kafkajs";
 import {
 	DLQ_ERROR_SOURCES,
 	DropFirst,
-	IKafkaMessage,
 	IKafkaMessageProcessor,
 	IKafkaMessageProcessorMessageArg,
 	IKafkaSubscriptionConfig,
@@ -277,7 +277,7 @@ export class KafkaConsumerService {
 			this.transactionLogger.log(
 				`[KafkaConsumerService] [ConsumerRun - ${topic}] Publishing to DLQ...`,
 			);
-			const dlqMsg: IKafkaMessage = {
+			const dlqMsg: Omit<Message, "value"> & { value: unknown } = {
 				key: message.key?.toString() || DLQ_ERROR_SOURCES.CONSUMER,
 				value: {
 					body: message.value?.toString(),
