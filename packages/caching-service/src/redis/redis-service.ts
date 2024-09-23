@@ -307,4 +307,16 @@ export class RedisService {
 			throw err;
 		}
 	}
+
+	async keys(pattern: string) {
+		try {
+			this.transactionLogger.log(`Getting keys with pattern: ${pattern}`);
+			return await this._client.keys(pattern);
+		} catch (e) {
+			const err = new RedisServiceError(`Error getting keys with pattern: ${pattern}`, e);
+			this.transactionLogger.error(err.message);
+			this.apm?.captureError(err);
+			throw err;
+		}
+	}
 }
