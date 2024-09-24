@@ -17,12 +17,6 @@ export class AppModule {
 				app.enableCors();
 				app.enableShutdownHooks();
 				app.setGlobalPrefix("/api");
-				app.useGlobalPipes(
-					new ValidationPipe({
-						transform: true,
-						whitelist: true,
-					}),
-				);
 				const config = new DocumentBuilder()
 					.setTitle(constants.SWAGGER.TITLE)
 					.setDescription(constants.SWAGGER.DESCRIPTION)

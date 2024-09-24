@@ -11,7 +11,7 @@ export class TodoEntity {
 	@ApiProperty({ type: "string", example: "Title", description: "The title of the todo" })
 	title: string;
 
-	@Expose()
+	// @Expose()
 	@ApiProperty({
 		type: "string",
 		example: "Description",

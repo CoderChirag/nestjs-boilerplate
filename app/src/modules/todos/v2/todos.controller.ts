@@ -1,13 +1,21 @@
 import { CLASS_SERIALIZER_OPTIONS } from "@nestjs/common/serializer/class-serializer.constants";
-import { ClassSerializerInterceptor, Controller, Get, UseInterceptors } from "@nestjs/common";
+import {
+	ClassSerializerInterceptor,
+	Controller,
+	Get,
+	UseInterceptors,
+	UsePipes,
+} from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { BaseErrorResponseDto } from "src/dtos/error-response.dto";
 import { TodosServiceV2 } from "./todos.service";
 import { GetAllTodosResDto } from "./todos.dto";
 import { TodoEntity } from "src/utility/entities/todos/todo.entity";
+import { HttpReqValidationPipe } from "src/pipes/http-req-validation.pipe";
 
 @Reflect.metadata(CLASS_SERIALIZER_OPTIONS, { excludeExtraneousValues: true })
 @ApiTags("Todos")
+@UsePipes(HttpReqValidationPipe)
 @Controller("v2/todos")
 @ApiResponse({
 	status: 500,
