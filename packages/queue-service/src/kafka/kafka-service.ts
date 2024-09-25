@@ -126,6 +126,17 @@ export class KafkaService {
 		}
 	}
 
+	async deleteTopics(options: { topics: string[]; timeout?: number }) {
+		try {
+			await this._admin.deleteTopics(options);
+		} catch (e) {
+			const err = new KafkaServiceError(`Error deleting topics - ${options.topics}`, e);
+			this.transactionLogger.error(err.message);
+			this.apm?.captureError(err);
+			throw err;
+		}
+	}
+
 	async registerSchema(
 		filePath: string,
 		topic: string,
