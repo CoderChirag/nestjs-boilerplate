@@ -278,7 +278,7 @@ export class KafkaConsumerService {
 				`[KafkaConsumerService] [ConsumerRun - ${topic}] Publishing to DLQ...`,
 			);
 			const dlqMsg: Omit<Message, "value"> & { value: unknown } = {
-				key: message.key?.toString() || DLQ_ERROR_SOURCES.CONSUMER,
+				key: message.key?.toString(),
 				value: {
 					body: message.value?.toString(),
 					error: {
