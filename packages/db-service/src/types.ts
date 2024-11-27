@@ -5,7 +5,8 @@ import { SqlService } from "./sql/sql-service";
 import {
 	Model as MongooseModel,
 	Schema as MongooseSchema,
-	ConnectOptions as MongoConnectOptions,
+	Document as MongooseDocument,
+	ConnectOptions as MongooseConnectOptions,
 } from "mongoose";
 import { Agent } from "elastic-apm-node";
 import { Logger } from "@repo/utility-types";
@@ -14,7 +15,12 @@ export type MongoSchemasType = Record<string, MongooseSchema>;
 export type SqlModelsType = Record<string, (db: Sequelize) => any>;
 export type IConfigModelsOrSchemas = MongoSchemasType | SqlModelsType;
 
-export type MongoSchemaEntityType<S> = S extends MongooseSchema<infer T> ? T : never;
+export type MongoSchemaEntityType<S> =
+	S extends MongooseSchema<infer T>
+		? T extends MongooseDocument<any, any, infer K>
+			? K
+			: never
+		: never;
 export type IMongoModels<S> = {
 	[K in keyof S]: MongooseModel<MongoSchemaEntityType<S[K]>>;
 };
@@ -22,6 +28,12 @@ export type ISqlModels<T extends SqlModelsType> = {
 	[K in keyof T]: ReturnType<T[K]>;
 };
 
+export interface MongoConnectOptions extends MongooseConnectOptions {
+	connectTimeoutMS?: number;
+	serverSelectionTimeoutMS?: number;
+	poolSize?: number;
+	keepAlive?: boolean;
+}
 export interface IMongoConfigOptions<S extends MongoSchemasType> {
 	type: typeof SUPPORTED_DBS.MONGO_DB;
 	connectionString: string;
